@@ -1,0 +1,23 @@
+DirectoryFileService:
+    - move to path
+    - show elements
+    - upload File
+    - create File
+    - rename File
+    - move element
+
+Controller:
+    - /login
+    - /{user}
+    - /{user}/{path}
+    - /{user}/{path}/download
+    - /{user}/{path}/upload
+    - /{user}/{path}/move
+    - /{user}/{path}/rename
+
+Di
+
+USE:
+    - vmware
+
+https://learn.microsoft.com/en-us/sql/connect/jdbc/download-microsoft-jdbc-driver-for-sql-server?view=sql-server-ver16#download

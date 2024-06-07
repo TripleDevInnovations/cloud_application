@@ -1,0 +1,78 @@
+package com.personal_projects.cloud_application.backend.services.impl;
+
+import com.personal_projects.cloud_application.backend.dto.JwtAuthenticationResponse;
+import com.personal_projects.cloud_application.backend.dto.SignInRequest;
+import com.personal_projects.cloud_application.backend.dto.SignUpRequest;
+import com.personal_projects.cloud_application.backend.dto.TokenRequest;
+import com.personal_projects.cloud_application.backend.entities.User;
+import com.personal_projects.cloud_application.backend.repositories.UserRepo;
+import com.personal_projects.cloud_application.backend.services.AuthenticationService;
+import com.personal_projects.cloud_application.backend.services.JWTService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+import java.util.HashMap;
+
+@Service
+@RequiredArgsConstructor
+public class AuthenticationServiceImpl implements AuthenticationService {
+
+    private final UserRepo userRepo;
+    private final PasswordEncoder passwordEncoder;
+    private final AuthenticationManager authenticationManager;
+    private final JWTService jwtService;
+
+    public User signUp(SignUpRequest signUpRequest) {
+        if (userRepo.findUserByName(userRepo.findAll(), signUpRequest.getUsername()) == null) {
+            User user = new User();
+            user.setUsername(signUpRequest.getUsername());
+            user.setRole(signUpRequest.getRole());
+            user.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
+            return userRepo.save(user);
+        }
+        return null;
+    }
+
+    public JwtAuthenticationResponse signin(SignInRequest signInRequest) {
+        try {
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(signInRequest.getUsername(), signInRequest.getPassword()));
+        } catch (AuthenticationException e) {
+            e.printStackTrace();
+            return null;
+        }
+        var user = userRepo.findByUsername(signInRequest.getUsername()).orElseThrow(() -> new IllegalArgumentException("Invalid username or password"));
+        var jwt = jwtService.generateToken(user);
+        var refreshToken = jwtService.generateRefreshToken(new HashMap<>(), user);
+
+        JwtAuthenticationResponse jwtAuthenticationResponse = new JwtAuthenticationResponse();
+        jwtAuthenticationResponse.setToken(jwt);
+        jwtAuthenticationResponse.setRefreshToken(refreshToken);
+        return jwtAuthenticationResponse;
+    }
+
+    public JwtAuthenticationResponse refreshToken(TokenRequest refreshTokenRequest) {
+        try {
+            String username = jwtService.extractUsername(refreshTokenRequest.getToken());
+            User user = userRepo.findByUsername(username)
+                    .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
+
+            if (jwtService.isTokenValid(refreshTokenRequest.getToken(), user)) {
+                var jwt = jwtService.generateToken(user);
+                JwtAuthenticationResponse jwtAuthenticationResponse = new JwtAuthenticationResponse();
+                jwtAuthenticationResponse.setToken(jwt);
+                jwtAuthenticationResponse.setRefreshToken(refreshTokenRequest.getToken());
+                return jwtAuthenticationResponse;
+            } else {
+                return null;
+            }
+        } catch (AuthenticationException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+}
