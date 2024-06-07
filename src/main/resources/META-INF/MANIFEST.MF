@@ -1,0 +1,3 @@
+Manifest-Version: 1.0
+Main-Class: com.personal_projects.cloud_application.CloudApplication
+
