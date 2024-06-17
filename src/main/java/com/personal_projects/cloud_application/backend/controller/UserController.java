@@ -10,16 +10,14 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-//@RequestMapping("/{username}")
+// @RequestMapping("/{username}")
 @RequiredArgsConstructor
 public class UserController {
 
-    @Autowired
-    private UserRepo userRepo;
+  @Autowired private UserRepo userRepo;
 
-    @GetMapping
-    public Optional<User> getUser(@PathVariable String username) {
-        return userRepo.findByUsername(username);
-    }
-
+  @GetMapping
+  public Optional<User> getUser(@PathVariable String username) {
+    return userRepo.findByUsername(username);
+  }
 }

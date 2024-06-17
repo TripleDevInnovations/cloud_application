@@ -54,7 +54,7 @@ public class AuthenticationServiceTest {
             invocation -> {
               User savedUser = invocation.getArgument(0);
               return savedUser; // Return the user that was passed to save, which should have the
-                                // encoded password
+              // encoded password
             });
 
     User savedUser = authenticationService.signUp(signUpRequest);
@@ -79,7 +79,7 @@ public class AuthenticationServiceTest {
             invocation -> {
               User savedUser = invocation.getArgument(0);
               return savedUser; // Return the user that was passed to save, which should have the
-                                // encoded password
+              // encoded password
             });
 
     User savedUser = authenticationService.signUp(signUpRequest);
@@ -105,7 +105,7 @@ public class AuthenticationServiceTest {
             invocation -> {
               User savedUser = invocation.getArgument(0);
               return savedUser; // Return the user that was passed to save, which should have the
-                                // encoded password
+              // encoded password
             });
 
     User savedUser = authenticationService.signUp(signUpRequest);
