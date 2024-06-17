@@ -15,7 +15,7 @@ import com.personal_projects.cloud_application.backend.services.JWTService;
 import com.personal_projects.cloud_application.backend.services.impl.AuthenticationServiceImpl;
 import java.util.HashMap;
 import java.util.Optional;
-import org.assertj.core.api.Assertions; //Richtiger import?????????????????????
+import org.assertj.core.api.Assertions; // Richtiger import?????????????????????
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -29,133 +29,142 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 @ExtendWith(MockitoExtension.class)
 public class AuthenticationServiceTest {
-    @Mock
-    private UserRepo userRepo;
+  @Mock private UserRepo userRepo;
 
-    @Mock
-    private PasswordEncoder passwordEncoder;
+  @Mock private PasswordEncoder passwordEncoder;
 
-    @Mock
-    private AuthenticationManager authenticationManager;
+  @Mock private AuthenticationManager authenticationManager;
 
-    @Mock
-    private JWTService jwtService;
+  @Mock private JWTService jwtService;
 
-    @InjectMocks
-    private AuthenticationServiceImpl authenticationService;
+  @InjectMocks private AuthenticationServiceImpl authenticationService;
 
-    @Test
-    public void AuthenticationService_SignUp_ReturnsUserUser() {
-        SignUpRequest signUpRequest = new SignUpRequest();
-        signUpRequest.setUsername(";pM_Vl##3QGNl6pX1IRY}#,_s'9UJ1");
-        signUpRequest.setPassword(";pM_Vl##3QGNl6pX1IRY}#,_s'9UJ1");
-        signUpRequest.setRole(Role.USER);
+  @Test
+  public void AuthenticationService_SignUp_ReturnsUserUser() {
+    SignUpRequest signUpRequest = new SignUpRequest();
+    signUpRequest.setUsername(";pM_Vl##3QGNl6pX1IRY}#,_s'9UJ1");
+    signUpRequest.setPassword(";pM_Vl##3QGNl6pX1IRY}#,_s'9UJ1");
+    signUpRequest.setRole(Role.USER);
 
-        when(passwordEncoder.encode(anyString())).thenReturn("encodedPassword");
+    when(passwordEncoder.encode(anyString())).thenReturn("encodedPassword");
 
-        // Capture the User object when save is called and return it
-        when(userRepo.save(any(User.class))).thenAnswer(invocation -> {
-            User savedUser = invocation.getArgument(0);
-            return savedUser; // Return the user that was passed to save, which should have the encoded password
-        });
+    // Capture the User object when save is called and return it
+    when(userRepo.save(any(User.class)))
+        .thenAnswer(
+            invocation -> {
+              User savedUser = invocation.getArgument(0);
+              return savedUser; // Return the user that was passed to save, which should have the
+                                // encoded password
+            });
 
-        User savedUser = authenticationService.signUp(signUpRequest);
+    User savedUser = authenticationService.signUp(signUpRequest);
 
-        Assertions.assertThat(savedUser.getPassword()).isEqualTo("encodedPassword");
-        Assertions.assertThat(savedUser.getUsername()).isEqualTo(";pM_Vl##3QGNl6pX1IRY}#,_s'9UJ1");
-        Assertions.assertThat(savedUser.getRole()).isEqualTo(Role.USER);
-    }
-    @Test
-    public void AuthenticationService_SignUp_ReturnsAdminUser() {
-        SignUpRequest signUpRequest = new SignUpRequest();
-        signUpRequest.setUsername(";pM_Vl##3QGNl6pX1IRY}#,_s'9UJ1");
-        signUpRequest.setPassword(";pM_Vl##3QGNl6pX1IRY}#,_s'9UJ1");
-        signUpRequest.setRole(Role.ADMIN);
+    Assertions.assertThat(savedUser.getPassword()).isEqualTo("encodedPassword");
+    Assertions.assertThat(savedUser.getUsername()).isEqualTo(";pM_Vl##3QGNl6pX1IRY}#,_s'9UJ1");
+    Assertions.assertThat(savedUser.getRole()).isEqualTo(Role.USER);
+  }
 
-        when(passwordEncoder.encode(anyString())).thenReturn("encodedPassword");
+  @Test
+  public void AuthenticationService_SignUp_ReturnsAdminUser() {
+    SignUpRequest signUpRequest = new SignUpRequest();
+    signUpRequest.setUsername(";pM_Vl##3QGNl6pX1IRY}#,_s'9UJ1");
+    signUpRequest.setPassword(";pM_Vl##3QGNl6pX1IRY}#,_s'9UJ1");
+    signUpRequest.setRole(Role.ADMIN);
 
-        // Capture the User object when save is called and return it
-        when(userRepo.save(any(User.class))).thenAnswer(invocation -> {
-            User savedUser = invocation.getArgument(0);
-            return savedUser; // Return the user that was passed to save, which should have the encoded password
-        });
+    when(passwordEncoder.encode(anyString())).thenReturn("encodedPassword");
 
-        User savedUser = authenticationService.signUp(signUpRequest);
+    // Capture the User object when save is called and return it
+    when(userRepo.save(any(User.class)))
+        .thenAnswer(
+            invocation -> {
+              User savedUser = invocation.getArgument(0);
+              return savedUser; // Return the user that was passed to save, which should have the
+                                // encoded password
+            });
 
-        Assertions.assertThat(savedUser).isNotNull();
-        Assertions.assertThat(savedUser.getPassword()).isEqualTo("encodedPassword");
-        Assertions.assertThat(savedUser.getUsername()).isEqualTo(";pM_Vl##3QGNl6pX1IRY}#,_s'9UJ1");
-        Assertions.assertThat(savedUser.getRole()).isEqualTo(Role.ADMIN);
-    }
-    @Test
-    public void AuthenticationService_SignUp_ReturnsOwnerUser() {
-        SignUpRequest signUpRequest = new SignUpRequest();
-        signUpRequest.setUsername(";pM_Vl##3QGNl6pX1IRY}#,_s'9UJ1");
-        signUpRequest.setPassword(";pM_Vl##3QGNl6pX1IRY}#,_s'9UJ1");
-        signUpRequest.setRole(Role.OWNER);
+    User savedUser = authenticationService.signUp(signUpRequest);
 
-        when(passwordEncoder.encode(anyString())).thenReturn("encodedPassword");
+    Assertions.assertThat(savedUser).isNotNull();
+    Assertions.assertThat(savedUser.getPassword()).isEqualTo("encodedPassword");
+    Assertions.assertThat(savedUser.getUsername()).isEqualTo(";pM_Vl##3QGNl6pX1IRY}#,_s'9UJ1");
+    Assertions.assertThat(savedUser.getRole()).isEqualTo(Role.ADMIN);
+  }
 
-        // Capture the User object when save is called and return it
-        when(userRepo.save(any(User.class))).thenAnswer(invocation -> {
-            User savedUser = invocation.getArgument(0);
-            return savedUser; // Return the user that was passed to save, which should have the encoded password
-        });
+  @Test
+  public void AuthenticationService_SignUp_ReturnsOwnerUser() {
+    SignUpRequest signUpRequest = new SignUpRequest();
+    signUpRequest.setUsername(";pM_Vl##3QGNl6pX1IRY}#,_s'9UJ1");
+    signUpRequest.setPassword(";pM_Vl##3QGNl6pX1IRY}#,_s'9UJ1");
+    signUpRequest.setRole(Role.OWNER);
 
-        User savedUser = authenticationService.signUp(signUpRequest);
+    when(passwordEncoder.encode(anyString())).thenReturn("encodedPassword");
 
-        Assertions.assertThat(savedUser).isNotNull();
-        Assertions.assertThat(savedUser.getPassword()).isEqualTo("encodedPassword");
-        Assertions.assertThat(savedUser.getUsername()).isEqualTo(";pM_Vl##3QGNl6pX1IRY}#,_s'9UJ1");
-        Assertions.assertThat(savedUser.getRole()).isEqualTo(Role.OWNER);
-    }
+    // Capture the User object when save is called and return it
+    when(userRepo.save(any(User.class)))
+        .thenAnswer(
+            invocation -> {
+              User savedUser = invocation.getArgument(0);
+              return savedUser; // Return the user that was passed to save, which should have the
+                                // encoded password
+            });
 
-    @Test
-    public void AuthenticationService_SignIn_ReturnsAuthenticationResponse() {
-        SignInRequest signInRequest = new SignInRequest();
-        signInRequest.setUsername(";pM_Vl##3QGNl6pX1IRY}#,_s'9UJ1");
-        signInRequest.setPassword(";pM_Vl##3QGNl6pX1IRY}#,_s'9UJ1");
-        User user = new User();
-        user.setUsername(signInRequest.getUsername());
-        user.setPassword(passwordEncoder.encode(signInRequest.getPassword()));
+    User savedUser = authenticationService.signUp(signUpRequest);
 
-        Authentication auth = Mockito.mock(Authentication.class);
-        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class))).thenReturn(auth);
+    Assertions.assertThat(savedUser).isNotNull();
+    Assertions.assertThat(savedUser.getPassword()).isEqualTo("encodedPassword");
+    Assertions.assertThat(savedUser.getUsername()).isEqualTo(";pM_Vl##3QGNl6pX1IRY}#,_s'9UJ1");
+    Assertions.assertThat(savedUser.getRole()).isEqualTo(Role.OWNER);
+  }
 
-        when(userRepo.findByUsername(anyString())).thenReturn(Optional.of(user));
-        when(jwtService.generateToken(any(User.class))).thenReturn("jwtToken");
-        when(jwtService.generateRefreshToken(any(HashMap.class), any(User.class))).thenReturn("refreshToken");
+  @Test
+  public void AuthenticationService_SignIn_ReturnsAuthenticationResponse() {
+    SignInRequest signInRequest = new SignInRequest();
+    signInRequest.setUsername(";pM_Vl##3QGNl6pX1IRY}#,_s'9UJ1");
+    signInRequest.setPassword(";pM_Vl##3QGNl6pX1IRY}#,_s'9UJ1");
+    User user = new User();
+    user.setUsername(signInRequest.getUsername());
+    user.setPassword(passwordEncoder.encode(signInRequest.getPassword()));
 
-        JwtAuthenticationResponse response = authenticationService.signin(signInRequest);
+    Authentication auth = Mockito.mock(Authentication.class);
+    when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+        .thenReturn(auth);
 
-        Assertions.assertThat(response.getToken()).isEqualTo("jwtToken");
-        Assertions.assertThat(response.getRefreshToken()).isEqualTo("refreshToken");
-    }
+    when(userRepo.findByUsername(anyString())).thenReturn(Optional.of(user));
+    when(jwtService.generateToken(any(User.class))).thenReturn("jwtToken");
+    when(jwtService.generateRefreshToken(any(HashMap.class), any(User.class)))
+        .thenReturn("refreshToken");
 
-    @Test
-    public void AuthenticationService_RefreshToken_ReturnsNewToken() {
-        // Given
-        TokenRequest refreshTokenRequest = new TokenRequest();
-        refreshTokenRequest.setToken("validRefreshToken");
+    JwtAuthenticationResponse response = authenticationService.signin(signInRequest);
 
-        User user = new User();
-        user.setUsername("testUser");
+    Assertions.assertThat(response.getToken()).isEqualTo("jwtToken");
+    Assertions.assertThat(response.getRefreshToken()).isEqualTo("refreshToken");
+  }
 
-        // Mock the JWTService to return the expected username and token validation result
-        when(jwtService.extractUsername(refreshTokenRequest.getToken())).thenReturn(user.getUsername());
-        when(jwtService.isTokenValid(refreshTokenRequest.getToken(), user)).thenReturn(true);
-        when(jwtService.generateToken(user)).thenReturn("newJwtToken");
+  @Test
+  public void AuthenticationService_RefreshToken_ReturnsNewToken() {
+    // Given
+    TokenRequest refreshTokenRequest = new TokenRequest();
+    refreshTokenRequest.setToken("validRefreshToken");
 
-        // Mock the UserRepo to return an Optional of User
-        when(userRepo.findByUsername(user.getUsername())).thenReturn(Optional.of(user));
+    User user = new User();
+    user.setUsername("testUser");
 
-        // When
-        JwtAuthenticationResponse jwtAuthenticationResponse = authenticationService.refreshToken(refreshTokenRequest);
+    // Mock the JWTService to return the expected username and token validation result
+    when(jwtService.extractUsername(refreshTokenRequest.getToken())).thenReturn(user.getUsername());
+    when(jwtService.isTokenValid(refreshTokenRequest.getToken(), user)).thenReturn(true);
+    when(jwtService.generateToken(user)).thenReturn("newJwtToken");
 
-        // Then
-        Assertions.assertThat(jwtAuthenticationResponse).isNotNull();
-        Assertions.assertThat(jwtAuthenticationResponse.getToken()).isEqualTo("newJwtToken");
-        Assertions.assertThat(jwtAuthenticationResponse.getRefreshToken()).isEqualTo("validRefreshToken");
-    }
+    // Mock the UserRepo to return an Optional of User
+    when(userRepo.findByUsername(user.getUsername())).thenReturn(Optional.of(user));
 
+    // When
+    JwtAuthenticationResponse jwtAuthenticationResponse =
+        authenticationService.refreshToken(refreshTokenRequest);
+
+    // Then
+    Assertions.assertThat(jwtAuthenticationResponse).isNotNull();
+    Assertions.assertThat(jwtAuthenticationResponse.getToken()).isEqualTo("newJwtToken");
+    Assertions.assertThat(jwtAuthenticationResponse.getRefreshToken())
+        .isEqualTo("validRefreshToken");
+  }
 }

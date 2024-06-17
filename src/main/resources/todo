@@ -21,3 +21,5 @@ USE:
     - vmware
 
 https://learn.microsoft.com/en-us/sql/connect/jdbc/download-microsoft-jdbc-driver-for-sql-server?view=sql-server-ver16#download
+
+google java format plugin installieren und schritte (https://github.com/google/google-java-format/blob/master/README.md#intellij-jre-config) unter Überschrift intellij JRE Config durchführen

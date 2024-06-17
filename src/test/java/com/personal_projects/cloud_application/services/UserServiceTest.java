@@ -1,22 +1,20 @@
 package com.personal_projects.cloud_application.services;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.when;
+
 import com.personal_projects.cloud_application.backend.entities.User;
 import com.personal_projects.cloud_application.backend.repositories.UserRepo;
 import com.personal_projects.cloud_application.backend.services.impl.UserServiceImpl;
+import java.util.Optional;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
