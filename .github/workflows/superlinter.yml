@@ -3,14 +3,15 @@ name: Super-Linter
 on:
   push
 
+permissions:
+  contents: read
+  packages: read
+  statuses: write  # To report GitHub Actions status checks
+
 jobs:
   super-lint:
     name: Lint code base
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: read
-      statuses: write  # To report GitHub Actions status checks
 
     steps:
       - name: Checkout code
