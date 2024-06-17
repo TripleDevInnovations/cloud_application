@@ -8,15 +8,14 @@ import com.personal_projects.cloud_application.backend.entities.User;
 import com.personal_projects.cloud_application.backend.repositories.UserRepo;
 import com.personal_projects.cloud_application.backend.services.AuthenticationService;
 import com.personal_projects.cloud_application.backend.services.JWTService;
+import java.util.HashMap;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
-import java.util.HashMap;
+import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor

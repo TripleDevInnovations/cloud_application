@@ -1,5 +1,9 @@
 package com.personal_projects.cloud_application.services;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
+
 import com.personal_projects.cloud_application.backend.dto.JwtAuthenticationResponse;
 import com.personal_projects.cloud_application.backend.dto.SignInRequest;
 import com.personal_projects.cloud_application.backend.dto.SignUpRequest;
@@ -9,6 +13,8 @@ import com.personal_projects.cloud_application.backend.entities.User;
 import com.personal_projects.cloud_application.backend.repositories.UserRepo;
 import com.personal_projects.cloud_application.backend.services.JWTService;
 import com.personal_projects.cloud_application.backend.services.impl.AuthenticationServiceImpl;
+import java.util.HashMap;
+import java.util.Optional;
 import org.assertj.core.api.Assertions; //Richtiger import?????????????????????
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,13 +26,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
-import java.util.HashMap;
-import java.util.Optional;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class AuthenticationServiceTest {

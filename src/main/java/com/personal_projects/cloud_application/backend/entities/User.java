@@ -18,36 +18,37 @@ import java.util.List;
 @Entity
 public class User implements UserDetails {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_seq")
-    @SequenceGenerator(name = "user_seq", sequenceName = "user_sequence", allocationSize = 1)
-    private int id;
-    private String username;
-    private String password;
-    private Role role;
+  @Id
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_seq")
+  @SequenceGenerator(name = "user_seq", sequenceName = "user_sequence", allocationSize = 1)
+  private int id;
 
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of();
-    }
+  private String username;
+  private String password;
+  private Role role;
 
-    @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
+  @Override
+  public Collection<? extends GrantedAuthority> getAuthorities() {
+    return List.of();
+  }
 
-    @Override
-    public boolean isAccountNonLocked() {
-        return true;
-    }
+  @Override
+  public boolean isAccountNonExpired() {
+    return true;
+  }
 
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
+  @Override
+  public boolean isAccountNonLocked() {
+    return true;
+  }
 
-    @Override
-    public boolean isEnabled() {
-        return true;
-    }
+  @Override
+  public boolean isCredentialsNonExpired() {
+    return true;
+  }
+
+  @Override
+  public boolean isEnabled() {
+    return true;
+  }
 }

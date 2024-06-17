@@ -1,8 +1,7 @@
 package com.personal_projects.cloud_application.backend.services;
 
-import org.springframework.security.core.userdetails.UserDetails;
-
 import java.util.Map;
+import org.springframework.security.core.userdetails.UserDetails;
 
 public interface JWTService {
 
