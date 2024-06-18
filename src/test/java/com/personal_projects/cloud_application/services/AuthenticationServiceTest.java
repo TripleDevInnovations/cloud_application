@@ -15,7 +15,7 @@ import com.personal_projects.cloud_application.backend.services.JWTService;
 import com.personal_projects.cloud_application.backend.services.impl.AuthenticationServiceImpl;
 import java.util.HashMap;
 import java.util.Optional;
-import org.assertj.core.api.Assertions; // Richtiger import?????????????????????
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
