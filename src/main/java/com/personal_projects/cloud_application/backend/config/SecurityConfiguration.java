@@ -16,9 +16,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-/**
- * Security configuration class for the cloud application backend.
- */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfiguration {
@@ -26,26 +23,12 @@ public class SecurityConfiguration {
   private final JwtAuthenticationFilter jwtAuthenticationFilter;
   private final UserService userService;
 
-  /**
-   * Constructor for SecurityConfiguration.
-   *
-   * @param jwtAuthenticationFilter the JWT authentication filter
-   * @param userService the user service
-   */
   public SecurityConfiguration(
-          final JwtAuthenticationFilter jwtAuthenticationFilter,
-          final UserService userService) {
+      JwtAuthenticationFilter jwtAuthenticationFilter, UserService userService) {
     this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     this.userService = userService;
   }
 
-  /**
-   * Configures the security filter chain.
-   *
-   * @param http the HttpSecurity object
-   * @return the SecurityFilterChain object
-   * @throws Exception if an error occurs
-   */
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     http.csrf(AbstractHttpConfigurer::disable)
@@ -71,11 +54,6 @@ public class SecurityConfiguration {
     return http.build();
   }
 
-  /**
-   * Configures the authentication provider.
-   *
-   * @return the AuthenticationProvider object
-   */
   @Bean
   public AuthenticationProvider authenticationProvider() {
     DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
@@ -84,26 +62,14 @@ public class SecurityConfiguration {
     return authenticationProvider;
   }
 
-  /**
-   * Configures the password encoder.
-   *
-   * @return the PasswordEncoder object
-   */
   @Bean
   public PasswordEncoder passwordEncoder() {
     return new BCryptPasswordEncoder();
   }
 
-  /**
-   * Configures the authentication manager.
-   *
-   * @param config the AuthenticationConfiguration object
-   * @return the AuthenticationManager object
-   * @throws Exception if an error occurs
-   */
   @Bean
   public AuthenticationManager authenticationManager(AuthenticationConfiguration config)
-          throws Exception {
+      throws Exception {
     return config.getAuthenticationManager();
   }
 }

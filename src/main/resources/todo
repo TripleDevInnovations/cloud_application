@@ -15,7 +15,6 @@ Controller:
     - /{user}/{path}/move
     - /{user}/{path}/rename
 
-Di
 
 USE:
     - vmware
@@ -23,3 +22,7 @@ USE:
 https://learn.microsoft.com/en-us/sql/connect/jdbc/download-microsoft-jdbc-driver-for-sql-server?view=sql-server-ver16#download
 
 google java format plugin installieren und schritte (https://github.com/google/google-java-format/blob/master/README.md#intellij-jre-config) unter Überschrift intellij JRE Config durchführen
+
+Evtl. doch in Datenbank informationen über dateien speichern (inkl. path). Das sollte für die Ausgabe im Frontend besser sein.
+Evtl. kann man auch die informationen(Größe, Name, Format) via prompt eingabe sich holen. Dann müsste aber jedes mal beim aufrufen seiner dateien
+diese Prompteingabe ausgeführt werden.
