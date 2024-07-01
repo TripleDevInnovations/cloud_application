@@ -31,25 +31,25 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
-            .authorizeHttpRequests(
-                request ->
-                    request
-                        .requestMatchers("/**")
-                        .permitAll()
-                        //                        .requestMatchers("/auth/**").permitAll()
-                        //                        .requestMatchers("/owner/**").permitAll()
-                        //
-                        // .requestMatchers("/admin").hasAnyAuthority(Role.ADMIN.name(),
-                        // Role.OWNER.name())
-                        //
-                        // .requestMatchers("/user").hasAnyAuthority(Role.USER.name(),
-                        // Role.ADMIN.name(), Role.OWNER.name())
-                        .anyRequest()
-                        .authenticated())
-            .sessionManagement(
-                manager -> manager.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authenticationProvider(authenticationProvider())
-            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                .authorizeHttpRequests(
+                        request ->
+                                request
+                                        .requestMatchers("/**")
+                                        .permitAll()
+                                        //                        .requestMatchers("/auth/**").permitAll()
+                                        //                        .requestMatchers("/owner/**").permitAll()
+                                        //
+                                        // .requestMatchers("/admin").hasAnyAuthority(Role.ADMIN.name(),
+                                        // Role.OWNER.name())
+                                        //
+                                        // .requestMatchers("/user").hasAnyAuthority(Role.USER.name(),
+                                        // Role.ADMIN.name(), Role.OWNER.name())
+                                        .anyRequest()
+                                        .authenticated())
+                .sessionManagement(
+                        manager -> manager.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authenticationProvider(authenticationProvider())
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
