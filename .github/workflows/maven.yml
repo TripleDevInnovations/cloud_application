@@ -24,3 +24,6 @@ jobs:
 
       - name: Run Checkstyle
         run: mvn checkstyle:check
+
+      - name: Run PMD
+        run: mvn pmd:check
