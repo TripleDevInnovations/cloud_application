@@ -32,4 +32,4 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: pmd-report
-          path: target/pmd.xml
+          path: /home/runner/work/cloud_application/cloud_application/target/pmd.xml
