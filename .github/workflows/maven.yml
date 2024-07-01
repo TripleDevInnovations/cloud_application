@@ -8,22 +8,6 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    services:
-      db:
-        image: mysql:5.7
-        ports:
-          - 3306:3306
-        options: >-
-          --health-cmd="mysqladmin ping --silent"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=3
-        env:
-          MYSQL_ROOT_PASSWORD: rootpassword
-          MYSQL_DATABASE: cloud_application
-          MYSQL_USER: testuser
-          MYSQL_PASSWORD: testpassword
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
