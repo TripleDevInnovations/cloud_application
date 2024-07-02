@@ -28,6 +28,9 @@ jobs:
       - name: Run PMD
         run: mvn pmd:check
 
+      - name: List PMD report directory
+        run: ls -la /home/runner/work/cloud_application/cloud_application/target
+
       - name: Archive PMD report
         uses: actions/upload-artifact@v3
         with:
