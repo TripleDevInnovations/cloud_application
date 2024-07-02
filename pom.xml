@@ -112,7 +112,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-pmd-plugin</artifactId>
-				<version>3.15.0</version>
+				<version>3.23.0</version>
 				<configuration>
 					<rulesets>
 						<ruleset>category/java/bestpractices.xml</ruleset>
@@ -121,7 +121,6 @@
 						<ruleset>category/java/performance.xml</ruleset>
 						<ruleset>category/java/security.xml</ruleset>
 					</rulesets>
-					<failOnViolation>false</failOnViolation>
 				</configuration>
 				<executions>
 					<execution>
