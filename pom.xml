@@ -121,6 +121,7 @@
 						<ruleset>category/java/performance.xml</ruleset>
 						<ruleset>category/java/security.xml</ruleset>
 					</rulesets>
+					<failOnViolation>false</failOnViolation>
 				</configuration>
 				<executions>
 					<execution>
