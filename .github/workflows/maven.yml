@@ -27,3 +27,9 @@ jobs:
 
       - name: Run PMD
         run: mvn pmd:check
+
+      - name: Archive PMD report
+        uses: actions/upload-artifact@v3
+        with:
+          name: pmd-report
+          path: target/pmd.xml
