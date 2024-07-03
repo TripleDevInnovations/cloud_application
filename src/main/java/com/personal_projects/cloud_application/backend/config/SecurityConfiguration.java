@@ -1,5 +1,6 @@
 package com.personal_projects.cloud_application.backend.config;
 
+import com.personal_projects.cloud_application.backend.exceptions.CustomAuthenticationException;
 import com.personal_projects.cloud_application.backend.services.UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,7 +17,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-
 @Configuration
 @EnableWebSecurity
 public class SecurityConfiguration {
@@ -30,24 +30,20 @@ public class SecurityConfiguration {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) {
-        try {
-            http.csrf(AbstractHttpConfigurer::disable)
-                    .authorizeHttpRequests(
-                            request ->
-                                    request
-                                            .requestMatchers("/**")
-                                            .permitAll()
-                                            .anyRequest()
-                                            .authenticated())
-                    .sessionManagement(
-                            manager -> manager.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                    .authenticationProvider(authenticationProvider())
-                    .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-            return http.build();
-        } catch (Exception e) {
-            throw new RuntimeException("Error configuring security filter chain", e);
-        }
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http.csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(
+                        request ->
+                                request
+                                        .requestMatchers("/**")
+                                        .permitAll()
+                                        .anyRequest()
+                                        .authenticated())
+                .sessionManagement(
+                        manager -> manager.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authenticationProvider(authenticationProvider())
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        return http.build();
     }
 
     @Bean
@@ -64,7 +60,11 @@ public class SecurityConfiguration {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-        return config.getAuthenticationManager();
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws CustomAuthenticationException {
+        try {
+            return config.getAuthenticationManager();
+        } catch (Exception e) {
+            throw new CustomAuthenticationException("Failed to get AuthenticationManager", e);
+        }
     }
 }
