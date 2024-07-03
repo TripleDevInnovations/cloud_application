@@ -4,7 +4,6 @@ import com.personal_projects.cloud_application.backend.dto.JwtAuthenticationResp
 import com.personal_projects.cloud_application.backend.dto.SignInRequest;
 import com.personal_projects.cloud_application.backend.dto.SignUpRequest;
 import com.personal_projects.cloud_application.backend.dto.TokenRequest;
-import com.personal_projects.cloud_application.backend.entities.Role;
 import com.personal_projects.cloud_application.backend.entities.User;
 import com.personal_projects.cloud_application.backend.repositories.UserRepo;
 import com.personal_projects.cloud_application.backend.services.AuthenticationService;
@@ -32,7 +31,7 @@ public class AuthenticationController {
 
     @PostMapping("/signup")
     public ResponseEntity<?> signup(@RequestBody SignUpRequest signUpRequest) {
-        if (signUpRequest.getRole() == Role.OWNER) {
+        if (signUpRequest.isOwnerRole()) {
             return ResponseEntity.badRequest()
                     .body(
                             communicationService.createErrorMessage(
