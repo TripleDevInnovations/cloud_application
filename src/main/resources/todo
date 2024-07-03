@@ -29,3 +29,15 @@ diese Prompteingabe ausgeführt werden.
 
 Bei SignIn  ist wichtig, dass der Name noch nicht existiert. Wichtig: hier wird nicht zwischen Groß- und Kleinschreibung unterschieden.
 Aber erstmal testen, ob das nicht bereits implementiert ist
+
+
+
+
+//                        .requestMatchers("/auth/**").permitAll()
+//                        .requestMatchers("/owner/**").permitAll()
+//
+// .requestMatchers("/admin").hasAnyAuthority(Role.ADMIN.name(),
+// Role.OWNER.name())
+//
+// .requestMatchers("/user").hasAnyAuthority(Role.USER.name(),
+// Role.ADMIN.name(), Role.OWNER.name())
