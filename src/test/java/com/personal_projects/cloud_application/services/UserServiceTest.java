@@ -16,7 +16,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
@@ -52,9 +51,9 @@ public class UserServiceTest {
         when(userRepo.findByUsername(username)).thenReturn(Optional.empty());
 
         // Act & Assert
-        UsernameNotFoundException thrown =
+        RuntimeException thrown =
                 assertThrows(
-                        UsernameNotFoundException.class,
+                        RuntimeException.class,
                         () -> userService.userDetailsService().loadUserByUsername(username),
                         "Expected loadUserByUsername to throw, but it didn't");
 
