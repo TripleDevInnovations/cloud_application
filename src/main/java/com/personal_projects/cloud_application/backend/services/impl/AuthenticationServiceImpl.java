@@ -51,7 +51,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                     new UsernamePasswordAuthenticationToken(
                             signInRequest.getUsername(), signInRequest.getPassword()));
         } catch (AuthenticationException e) {
-            logger.error("Authentication failed for user: {}", signInRequest.getUsername(), e);
+            if (logger.isErrorEnabled()) {
+                logger.error("Authentication failed for user: {}", signInRequest.getUsername(), e);
+            }
             return null;
         }
         var user =
@@ -87,7 +89,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 return null;
             }
         } catch (AuthenticationException e) {
-            logger.error("Token refresh failed", e);
+            if (logger.isErrorEnabled()) {
+                logger.error("Token refresh failed", e);
+            }
             return null;
         }
     }

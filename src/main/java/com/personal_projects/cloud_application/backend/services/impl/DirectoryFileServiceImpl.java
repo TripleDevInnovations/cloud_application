@@ -14,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 public class DirectoryFileServiceImpl implements DirectoryFileService {
 
+    @Override
     public String saveFile(MultipartFile file, String path) {
         if (file.isEmpty()) {
             return "Bitte wähle eine Datei aus!";
@@ -36,21 +37,18 @@ public class DirectoryFileServiceImpl implements DirectoryFileService {
         }
     }
 
+    @Override
     public String deleteFile(String path) {
-        try {
-            Path filePath = Paths.get(path);
-            File file = filePath.toFile();
-            if (file.exists()) {
-                if (file.delete()) {
-                    return "Datei erfolgreich gelöscht";
-                } else {
-                    return "Fehler beim Löschen der Datei";
-                }
+        Path filePath = Paths.get(path);
+        File file = filePath.toFile();
+        if (file.exists()) {
+            if (file.delete()) {
+                return "Datei erfolgreich gelöscht";
             } else {
-                return "Datei nicht gefunden";
+                return "Fehler beim Löschen der Datei";
             }
-        } catch (Exception e) {
-            return "Fehler beim Löschen der Datei: " + e.getMessage();
+        } else {
+            return "Datei nicht gefunden";
         }
     }
 }

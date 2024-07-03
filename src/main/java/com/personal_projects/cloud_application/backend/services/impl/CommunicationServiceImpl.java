@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class CommunicationServiceImpl implements CommunicationService {
 
+    @Override
     public Map<String, String> createErrorMessage(String error, String details) {
         Map<String, String> errorMessage = new HashMap<>();
         errorMessage.put("error", error);

@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class JWTServiceImpl implements JWTService {
 
+    @Override
     public String generateToken(UserDetails userDetails) {
         return Jwts.builder()
                 .setSubject(userDetails.getUsername())
@@ -27,6 +28,7 @@ public class JWTServiceImpl implements JWTService {
                 .compact();
     }
 
+    @Override
     public String generateRefreshToken(Map<String, Object> extraClaims, UserDetails userDetails) {
         return Jwts.builder()
                 .setClaims(extraClaims)
@@ -39,6 +41,7 @@ public class JWTServiceImpl implements JWTService {
                 .compact();
     }
 
+    @Override
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
@@ -58,6 +61,7 @@ public class JWTServiceImpl implements JWTService {
         return Jwts.parserBuilder().setSigningKey(getSignKey()).build().parseClaimsJws(token).getBody();
     }
 
+    @Override
     public boolean isTokenValid(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
