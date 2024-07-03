@@ -1,6 +1,5 @@
 package com.personal_projects.cloud_application.backend.config;
 
-import com.personal_projects.cloud_application.backend.exceptions.CustomAuthenticationException;
 import com.personal_projects.cloud_application.backend.services.UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -60,11 +59,7 @@ public class SecurityConfiguration {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws CustomAuthenticationException {
-        try {
-            return config.getAuthenticationManager();
-        } catch (Exception e) {
-            throw new CustomAuthenticationException("Failed to get AuthenticationManager", e);
-        }
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
     }
 }
