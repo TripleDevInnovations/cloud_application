@@ -12,6 +12,8 @@ import com.personal_projects.cloud_application.backend.services.JWTService;
 import java.util.HashMap;
 
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
@@ -23,11 +25,14 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class AuthenticationServiceImpl implements AuthenticationService {
 
+    private static final Logger logger = LoggerFactory.getLogger(AuthenticationServiceImpl.class);
+
     private final UserRepo userRepo;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JWTService jwtService;
 
+    @Override
     public User signUp(SignUpRequest signUpRequest) {
         if (userRepo.findUserByName(userRepo.findAll(), signUpRequest.getUsername()) == null) {
             User user = new User();
@@ -39,13 +44,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         return null;
     }
 
+    @Override
     public JwtAuthenticationResponse signin(SignInRequest signInRequest) {
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             signInRequest.getUsername(), signInRequest.getPassword()));
         } catch (AuthenticationException e) {
-            e.printStackTrace();
+            logger.error("Authentication failed for user: {}", signInRequest.getUsername(), e);
             return null;
         }
         var user =
@@ -61,6 +67,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         return jwtAuthenticationResponse;
     }
 
+    @Override
     public JwtAuthenticationResponse refreshToken(TokenRequest refreshTokenRequest) {
         try {
             String username = jwtService.extractUsername(refreshTokenRequest.getToken());
@@ -80,7 +87,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 return null;
             }
         } catch (AuthenticationException e) {
-            e.printStackTrace();
+            logger.error("Token refresh failed", e);
             return null;
         }
     }
