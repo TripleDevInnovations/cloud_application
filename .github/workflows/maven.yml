@@ -29,6 +29,7 @@ jobs:
         run: mvn pmd:check
 
       - name: Archive PMD report
+        if: always()  # dieser Schritt wird immer ausgeführt
         uses: actions/upload-artifact@v3
         with:
           name: pmd-report
