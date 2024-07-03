@@ -12,12 +12,14 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 @SpringBootApplication
 public class CloudApplication implements CommandLineRunner {
 
-    @Autowired private UserRepo userRepo;
+    @Autowired
+    private UserRepo userRepo;
 
     public static void main(String[] args) {
         SpringApplication.run(CloudApplication.class, args);
     }
 
+    @Override
     public void run(String... args) {
         User ownerUser = userRepo.findByRole(Role.OWNER);
         if (ownerUser == null) {

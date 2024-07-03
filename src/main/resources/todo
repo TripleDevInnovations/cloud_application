@@ -26,3 +26,6 @@ https://learn.microsoft.com/en-us/sql/connect/jdbc/download-microsoft-jdbc-drive
 Evtl. doch in Datenbank informationen über dateien speichern (inkl. path). Das sollte für die Ausgabe im Frontend besser sein.
 Evtl. kann man auch die informationen(Größe, Name, Format) via prompt eingabe sich holen. Dann müsste aber jedes mal beim aufrufen seiner dateien
 diese Prompteingabe ausgeführt werden.
+
+Bei SignIn  ist wichtig, dass der Name noch nicht existiert. Wichtig: hier wird nicht zwischen Groß- und Kleinschreibung unterschieden.
+Aber erstmal testen, ob das nicht bereits implementiert ist
