@@ -60,8 +60,9 @@ public class SecurityConfiguration {
         return new BCryptPasswordEncoder();
     }
 
+    @SneakyThrows
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) {
         return config.getAuthenticationManager();
     }
 }
