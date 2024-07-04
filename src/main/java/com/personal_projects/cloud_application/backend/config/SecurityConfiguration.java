@@ -1,6 +1,7 @@
 package com.personal_projects.cloud_application.backend.config;
 
 import com.personal_projects.cloud_application.backend.services.UserService;
+import lombok.SneakyThrows;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -28,8 +29,9 @@ public class SecurityConfiguration {
         this.userService = userService;
     }
 
+    @SneakyThrows
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) {
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(
                         request ->
@@ -58,8 +60,9 @@ public class SecurityConfiguration {
         return new BCryptPasswordEncoder();
     }
 
+    @SneakyThrows
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) {
         return config.getAuthenticationManager();
     }
 }
