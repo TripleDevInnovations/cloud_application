@@ -28,9 +28,9 @@ jobs:
       - name: Run PMD
         run: mvn pmd:check
 
-      - name: Archive PMD report
-        if: failure() && steps.pmd.outcome == 'failure'
-        uses: actions/upload-artifact@v4
-        with:
-          name: pmd-report
-          path: target/pmd.xml
+#      - name: Archive PMD report
+#        if: always()  # dieser Schritt wird immer ausgeführt
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: pmd-report
+#          path: target/pmd.xml
