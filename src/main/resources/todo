@@ -1,0 +1,45 @@
+DirectoryFileService:
+    - move to path
+    - show elements
+    - upload File
+    - create File
+    - rename File
+    - move element
+
+Controller:
+    - /login
+    - /{user}
+    - /{user}/{path}
+    - /{user}/{path}/download
+    - /{user}/{path}/upload
+    - /{user}/{path}/move
+    - /{user}/{path}/rename
+
+PMD:
+
+    Ein Quellcode-Analyse-Tool, das nach gängigen Fehlern wie ungenutzten Imports, unbenutzten Variablen, unnötigen Objekten usw. sucht.
+
+
+https://learn.microsoft.com/en-us/sql/connect/jdbc/download-microsoft-jdbc-driver-for-sql-server?view=sql-server-ver16#download
+
+
+Evtl. doch in Datenbank informationen über dateien speichern (inkl. path). Das sollte für die Ausgabe im Frontend besser sein.
+Evtl. kann man auch die informationen(Größe, Name, Format) via prompt eingabe sich holen. Dann müsste aber jedes mal beim aufrufen seiner dateien
+diese Prompteingabe ausgeführt werden.
+
+Bei SignIn  ist wichtig, dass der Name noch nicht existiert. Wichtig: hier wird nicht zwischen Groß- und Kleinschreibung unterschieden.
+Aber erstmal testen, ob das nicht bereits implementiert ist
+-> Problem: Man kann ein Nutzer mit gleicher Zeichenreinfolge erstellen, wenn Groß- und
+Kleinschreibung vertauscht ist. Bei der Anmeldung macht dies jedoch keinen unterschied.
+Hier zählt nur die exakte Reihenfolge beim Passwort, was wiederum dazu führen kann, dass man
+sich bei dem falschen Account einloggt
+
+
+//                        .requestMatchers("/auth/**").permitAll()
+//                        .requestMatchers("/owner/**").permitAll()
+//
+// .requestMatchers("/admin").hasAnyAuthority(Role.ADMIN.name(),
+// Role.OWNER.name())
+//
+// .requestMatchers("/user").hasAnyAuthority(Role.USER.name(),
+// Role.ADMIN.name(), Role.OWNER.name())
