@@ -2,6 +2,7 @@ package com.personal_projects.cloud_application.backend.entities;
 
 import jakarta.persistence.*;
 
+import java.io.Serial;
 import java.util.Collection;
 import java.util.List;
 
@@ -19,6 +20,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 @Entity
 public class User implements UserDetails {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     @Id
