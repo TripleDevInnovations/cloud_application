@@ -1,18 +1,23 @@
 package com.personal_projects.cloud_application.repositories;
 
-import com.personal_projects.cloud_application.backend.entities.User;
-import com.personal_projects.cloud_application.backend.repositories.UserRepo;
-
-import java.util.List;
-import java.util.Optional;
-
-import org.assertj.core.api.Assertions;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.boot.test.mock.mockito.MockBean;
+
+import com.personal_projects.cloud_application.backend.repositories.UserRepo;
+import com.personal_projects.cloud_application.backend.entities.User;
+import com.personal_projects.cloud_application.CloudApplication;
+
+import org.assertj.core.api.Assertions;
+
+import org.junit.runner.RunWith;
+import org.junit.Test;
+
+import java.util.Optional;
+import java.util.List;
+
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
@@ -21,6 +26,9 @@ public class UserRepoTest {
 
     @Autowired
     private UserRepo userRepo;
+
+    @MockBean
+    private CloudApplication cloudApplication;
 
     @Test
     public void userRepo_SaveAll_ReturnSavedUser() {

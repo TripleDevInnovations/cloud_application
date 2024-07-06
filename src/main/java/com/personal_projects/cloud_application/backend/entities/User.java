@@ -1,24 +1,28 @@
 package com.personal_projects.cloud_application.backend.entities;
 
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.GrantedAuthority;
+
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+import lombok.Data;
+
 import jakarta.persistence.*;
 
-import java.io.Serial;
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
+import java.io.Serial;
+
 
 @Data
+@Entity
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
-@Entity
-public class User implements UserDetails {
+public class User implements UserDetails, Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
@@ -30,7 +34,12 @@ public class User implements UserDetails {
 
     private String username;
     private String password;
+
+    @Enumerated(EnumType.STRING)
     private Role role;
+
+    @OneToOne
+    private Folder rootFolder;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

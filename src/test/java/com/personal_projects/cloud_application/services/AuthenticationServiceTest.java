@@ -1,38 +1,45 @@
 package com.personal_projects.cloud_application.services;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
-
+import com.personal_projects.cloud_application.backend.repositories.FolderRepo;
+import com.personal_projects.cloud_application.backend.services.impl.AuthenticationServiceImpl;
 import com.personal_projects.cloud_application.backend.dto.JwtAuthenticationResponse;
+import com.personal_projects.cloud_application.backend.repositories.UserRepo;
+import com.personal_projects.cloud_application.backend.services.JWTService;
 import com.personal_projects.cloud_application.backend.dto.SignInRequest;
 import com.personal_projects.cloud_application.backend.dto.SignUpRequest;
 import com.personal_projects.cloud_application.backend.dto.TokenRequest;
 import com.personal_projects.cloud_application.backend.entities.Role;
 import com.personal_projects.cloud_application.backend.entities.User;
-import com.personal_projects.cloud_application.backend.repositories.UserRepo;
-import com.personal_projects.cloud_application.backend.services.JWTService;
-import com.personal_projects.cloud_application.backend.services.impl.AuthenticationServiceImpl;
 
-import java.util.HashMap;
-import java.util.Optional;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.Authentication;
+
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.Test;
+
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.InjectMocks;
+import org.mockito.Mockito;
+import org.mockito.Mock;
 
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.password.PasswordEncoder;
+
+import java.util.Optional;
+import java.util.HashMap;
 
 @ExtendWith(MockitoExtension.class)
 public class AuthenticationServiceTest {
     @Mock
     private UserRepo userRepo;
+
+    @Mock
+    private FolderRepo folderRepo;
 
     @Mock
     private PasswordEncoder passwordEncoder;
