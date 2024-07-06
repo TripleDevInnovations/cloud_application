@@ -27,7 +27,7 @@ jobs:
 
       - name: Run PMD
         run: mvn pmd:check
-
+# folgenden Job enkommentieren, wenn github actions pmd-violation
 #      - name: Archive PMD report
 #        if: always()  # dieser Schritt wird immer ausgeführt
 #        uses: actions/upload-artifact@v4

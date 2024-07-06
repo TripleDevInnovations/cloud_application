@@ -29,17 +29,16 @@ public class SecurityConfiguration {
         this.userService = userService;
     }
 
-    @SneakyThrows
     @Bean
+    @SneakyThrows
     public SecurityFilterChain securityFilterChain(HttpSecurity http) {
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(
-                        request ->
-                                request
-                                        .requestMatchers("/**")
-                                        .permitAll()
-                                        .anyRequest()
-                                        .authenticated())
+                        request -> request
+                                .requestMatchers("/**")
+                                .permitAll()
+                                .anyRequest()
+                                .authenticated())
                 .sessionManagement(
                         manager -> manager.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
@@ -60,8 +59,8 @@ public class SecurityConfiguration {
         return new BCryptPasswordEncoder();
     }
 
-    @SneakyThrows
     @Bean
+    @SneakyThrows
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) {
         return config.getAuthenticationManager();
     }

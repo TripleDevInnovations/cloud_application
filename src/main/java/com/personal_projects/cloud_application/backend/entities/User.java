@@ -14,10 +14,10 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 @Data
+@Entity
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
-@Entity
 public class User implements UserDetails {
 
     @Serial
@@ -27,10 +27,14 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_seq")
     @SequenceGenerator(name = "user_seq", sequenceName = "user_sequence", allocationSize = 1)
     private int id;
-
     private String username;
     private String password;
     private Role role;
+
+    @OneToMany(cascade = CascadeType.ALL)
+    private List<Folder> folders;
+    @OneToMany(cascade = CascadeType.ALL)
+    private List<UserFile> files;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

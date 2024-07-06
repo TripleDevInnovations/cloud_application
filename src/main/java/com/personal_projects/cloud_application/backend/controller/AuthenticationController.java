@@ -32,18 +32,15 @@ public class AuthenticationController {
     @PostMapping("/signup")
     public ResponseEntity<?> signup(@RequestBody SignUpRequest signUpRequest) {
         if (signUpRequest.isOwnerRole()) {
-            return ResponseEntity.badRequest()
-                    .body(
-                            communicationService.createErrorMessage(
-                                    "Die Registrierung ist fehlgeschlagen.",
-                                    "Du darfst keinen Nutzer mit der Rolle: OWNER erstellen"));
+            return ResponseEntity.badRequest().body(communicationService.createErrorMessage(
+                    "Die Registrierung ist fehlgeschlagen.", "Du darfst keinen Nutzer mit der Rolle: OWNER erstellen"));
         }
         User user = authenticationService.signUp(signUpRequest);
         if (user != null) {
             return ResponseEntity.ok(user);
         } else {
-            return ResponseEntity.badRequest().body(
-                    communicationService.createErrorMessage("Die Registrierung ist fehlgeschlagen.", "Benutzername ist bereits vergeben."));
+            return ResponseEntity.badRequest().body(communicationService.createErrorMessage(
+                    "Die Registrierung ist fehlgeschlagen.", "Benutzername ist bereits vergeben."));
         }
     }
 

@@ -14,6 +14,8 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 public class DirectoryFileServiceImpl implements DirectoryFileService {
 
+    private final static String basePath = "C:\\Users\\Jacko\\Documents\\cloudstorage";
+
     @Override
     public String saveFile(MultipartFile file, String path) {
         if (file.isEmpty()) {

@@ -15,7 +15,7 @@ public interface UserRepo extends JpaRepository<User, Integer> {
 
     default User findUserByName(List<User> users, String name) {
         for (User user : users) {
-            if (user.getUsername() != null && user.getUsername().equals(name)) {
+            if (user.getUsername() != null && user.getUsername().equalsIgnoreCase(name)) {
                 return user;
             }
         }
