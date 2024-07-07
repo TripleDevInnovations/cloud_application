@@ -8,6 +8,7 @@ import com.personal_projects.cloud_application.backend.entities.User;
 import com.personal_projects.cloud_application.backend.repositories.UserRepo;
 import com.personal_projects.cloud_application.backend.services.AuthenticationService;
 import com.personal_projects.cloud_application.backend.services.CommunicationService;
+import com.personal_projects.cloud_application.backend.services.FileService;
 import com.personal_projects.cloud_application.backend.services.JWTService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,8 @@ public class AuthenticationController {
     private JWTService jwtService;
     @Autowired
     private CommunicationService communicationService;
+    @Autowired
+    private FileService fileService;
 
     @PostMapping("/signup")
     public ResponseEntity<?> signup(@RequestBody SignUpRequest signUpRequest) {
@@ -37,7 +40,8 @@ public class AuthenticationController {
         }
         User user = authenticationService.signUp(signUpRequest);
         if (user != null) {
-            return ResponseEntity.ok(user);
+            fileService.createFolder("", user.getUsername())
+;            return ResponseEntity.ok(user);
         } else {
             return ResponseEntity.badRequest().body(communicationService.createErrorMessage(
                     "Die Registrierung ist fehlgeschlagen.", "Benutzername ist bereits vergeben."));

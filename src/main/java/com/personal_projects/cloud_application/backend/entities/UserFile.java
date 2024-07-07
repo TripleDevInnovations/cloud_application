@@ -19,6 +19,7 @@ public class UserFile {
     private int id;
     private String fileName;
     private String fileType;
-    private String size;
+    private Long size;
     private String path;
+    private String user;
 }

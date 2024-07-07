@@ -34,7 +34,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     public User signUp(SignUpRequest signUpRequest) {
-        if (userRepo.findUserByName(userRepo.findAll(), signUpRequest.getUsername()) == null) {
+        if (userRepo.findByUsername(signUpRequest.getUsername()).isEmpty()) {
             User user = new User();
             user.setUsername(signUpRequest.getUsername());
             user.setRole(signUpRequest.getRole());
