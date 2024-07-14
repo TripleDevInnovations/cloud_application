@@ -41,7 +41,7 @@ public class AuthenticationController {
         User user = authenticationService.signUp(signUpRequest);
         if (user != null) {
             fileService.createFolder("", user.getUsername());
-;           return ResponseEntity.ok(user);
+            return ResponseEntity.ok(user);
         } else {
             return ResponseEntity.badRequest().body(communicationService.createErrorMessage(
                     "Die Registrierung ist fehlgeschlagen.", "Benutzername ist bereits vergeben."));
