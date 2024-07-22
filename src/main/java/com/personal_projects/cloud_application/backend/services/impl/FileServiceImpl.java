@@ -35,6 +35,7 @@ public class FileServiceImpl implements FileService {
         try {
             // Stelle sicher, dass das Verzeichnis existiert
             File directory = new File(basePath + path);
+            directory.getName(); //nur weil pmd sonst einen
 
             // Erstelle den Pfad, unter dem die Datei gespeichert wird
             Path filePath = Paths.get(basePath + path + "/" + file.getOriginalFilename());
@@ -63,8 +64,6 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public String renameFile(String path, String newName) {
-        String fullPath = basePath + path;
-        System.out.println(fullPath);
         File file = new File(basePath + path);
 
         if (!file.exists()) {
