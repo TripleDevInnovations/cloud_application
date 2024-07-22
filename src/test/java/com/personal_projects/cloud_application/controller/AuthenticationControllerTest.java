@@ -14,10 +14,7 @@ import com.personal_projects.cloud_application.backend.dto.TokenRequest;
 import com.personal_projects.cloud_application.backend.entities.Role;
 import com.personal_projects.cloud_application.backend.entities.User;
 import com.personal_projects.cloud_application.backend.repositories.UserRepo;
-import com.personal_projects.cloud_application.backend.services.AuthenticationService;
-import com.personal_projects.cloud_application.backend.services.CommunicationService;
-import com.personal_projects.cloud_application.backend.services.JWTService;
-import com.personal_projects.cloud_application.backend.services.UserService;
+import com.personal_projects.cloud_application.backend.services.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -61,32 +58,32 @@ public class AuthenticationControllerTest {
     @MockBean
     private CommunicationService communicationService;
 
+    @MockBean
+    private FileService fileService;
+
     @Test
     public void authenticationController_Signup_ReturnsUser() throws Exception {
         User testUser = new User();
         testUser.setUsername("testuser");
         testUser.setPassword("testuser");
         testUser.setRole(Role.USER);
-        Map<String, String> errorMessage = new HashMap<>();
-        errorMessage.put("error", "Error, der für deen Test gemacht ist");
-        errorMessage.put("details", "der wird benötigt, um die klasse zu testen");
+
+        SignUpRequest signUpRequest = new SignUpRequest();
+        signUpRequest.setUsername("testuser");
+        signUpRequest.setPassword("testuser");
 
         given(authenticationService.signUp(any(SignUpRequest.class))).willReturn(testUser);
-        given(communicationService.createErrorMessage(anyString(), anyString()))
-                .willReturn(errorMessage);
+        given(communicationService.createErrorMessage(anyString(), anyString())).willReturn(null);
 
         ResultActions response =
-                mockMvc.perform(
-                        post("/signup")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(new SignUpRequest())));
+                mockMvc.perform(post("/signup")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(signUpRequest)));
         response
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(
-                        MockMvcResultMatchers.jsonPath("$.username", CoreMatchers.is(testUser.getUsername())))
-                .andExpect(
-                        MockMvcResultMatchers.jsonPath("$.password", CoreMatchers.is(testUser.getPassword())))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.username", CoreMatchers.is(testUser.getUsername())))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.password", CoreMatchers.is(testUser.getPassword())))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.role", CoreMatchers.is("USER")));
     }
 
