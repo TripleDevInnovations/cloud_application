@@ -19,8 +19,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
-@RequestMapping("/{username}")
 @RequiredArgsConstructor
+@RequestMapping("/{username}")
 public class UserController {
 
     @Autowired
@@ -56,7 +56,7 @@ public class UserController {
         userFile.setSize(file.getSize());
         userFile.setPath(basePath + username + "/" + userFile.getFileName());
         userFile.setUser(username);
-        List<UserFile> files = new ArrayList<>();
+        List<UserFile> files = user.getFiles();
         files.add(userFile);
         user.setFiles(files);
 
@@ -94,4 +94,39 @@ public class UserController {
         return userFileRepo.save(userFile);
         //PathUpdate fehlt
     }
+
+    @DeleteMapping("/deletefile")
+    public User deleteFile(@PathVariable String username, @RequestParam("id") int id) {
+        UserFile userFile = userFileRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Datei nicht gefunden"));
+        User user = userRepo.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Benutzer nicht gefunden"));
+
+        if (!username.equals(userFile.getUser())) {
+            throw new RuntimeException("Datei gehört nicht zum Benutzer");
+        }
+
+        // Entferne die Datei aus der Liste des Benutzers
+        user.getFiles().removeIf(file -> file.getId() == id);
+
+        // Lösche die Datei vom Dateisystem
+        String response = fileService.deleteFile(userFile.getPath());
+        if (!response.equals("Datei erfolgreich gelöscht")) {
+            throw new RuntimeException("Fehler beim Löschen der Datei vom Dateisystem");
+        }
+
+        // Speichere den Benutzer ohne die Datei
+        userRepo.save(user);
+
+        // Lösche die Datei aus der Datenbank
+        userFileRepo.delete(userFile);
+
+        return user;
+    }
+
+//    @DeleteMapping("deleteFile")
+//    public User deleteFile(@PathVariable String username, ) {
+//
+//    }
+
 }
