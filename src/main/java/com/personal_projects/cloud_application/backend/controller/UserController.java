@@ -34,7 +34,7 @@ public class UserController {
     @Autowired
     private FileService fileService;
 
-    private final static String basePath = "C:/Users/Jacko/Documents/cloudstorage/";
+    private final static String basePath = "C:/Users/JAHEESE/Documents/cloudstorage/";
 
     @GetMapping
     public Optional<User> readUser(@PathVariable String username) {
@@ -73,7 +73,7 @@ public class UserController {
         User user = optionalUser.get();
         Folder folder = new Folder();
         folder.setFolderName(folderName);
-        folder.setPath(basePath + username + "/" + folderName);
+        folder.setPath(username + "/" + folderName);
         folder.setUser(username);
         List<Folder> folders = new ArrayList<>();
         folders.add(folder);
@@ -83,7 +83,7 @@ public class UserController {
         return userRepo.save(user);
     }
 
-    @PutMapping("/file")
+    @PutMapping
     public UserFile renameFile(@PathVariable String username, @RequestParam("id") int id, @RequestParam("newname") String newName) {
         UserFile userFile = userFileRepo.getReferenceById(id);
         String oldFolderName = userFile.getFileName();

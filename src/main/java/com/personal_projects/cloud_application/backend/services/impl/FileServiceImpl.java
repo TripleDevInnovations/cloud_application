@@ -14,7 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 public class FileServiceImpl implements FileService {
 
-    private final static String basePath = "C:/Users/Jacko/Documents/cloudstorage/";
+    private final static String basePath = "C:/Users/JAHEESE/Documents/cloudstorage/";
 
     @Override
     public String createFolder(String folderName, String path) {
@@ -27,9 +27,9 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public String saveFile(MultipartFile file, String path) {
+    public Boolean saveFile(MultipartFile file, String path) {
         if (file.isEmpty()) {
-            return "Bitte wähle eine Datei aus!";
+            return false;
         }
 
         try {
@@ -38,12 +38,12 @@ public class FileServiceImpl implements FileService {
             directory.getName(); //nur weil pmd sonst einen
 
             // Erstelle den Pfad, unter dem die Datei gespeichert wird
-            Path filePath = Paths.get(basePath + path + "/" + file.getOriginalFilename());
+            Path filePath = Paths.get(basePath + path);
             Files.write(filePath, file.getBytes());
 
-            return "Datei erfolgreich hochgeladen";
+            return true;
         } catch (IOException e) {
-            return "Fehler beim Hochladen der Datei: " + e.getMessage();
+            return false;
         }
     }
 
@@ -78,5 +78,28 @@ public class FileServiceImpl implements FileService {
         } else {
             return "Failed to rename file or directory.";
         }
+    }
+
+    @Override
+    public String changeFilePath(String filePath, String newFileName) {
+        // Überprüfen, ob der Dateipfad und der neue Dateiname nicht null oder leer sind
+        if (filePath == null || filePath.isEmpty() || newFileName == null || newFileName.isEmpty()) {
+            throw new IllegalArgumentException("File path and new file name must not be null or empty");
+        }
+
+        // Den letzten Index des Dateitrenners finden
+        int lastSeparatorIndex = filePath.lastIndexOf("/");
+
+        // Falls der Dateitrenner nicht gefunden wird, wird eine Ausnahme geworfen
+        if (lastSeparatorIndex == -1) {
+            throw new IllegalArgumentException("Invalid file path format");
+        }
+
+        // Den Verzeichnispfad extrahieren
+        String directoryPath = filePath.substring(0, lastSeparatorIndex + 1);
+
+        // Den neuen Dateipfad zusammensetzen
+
+        return directoryPath + newFileName;
     }
 }

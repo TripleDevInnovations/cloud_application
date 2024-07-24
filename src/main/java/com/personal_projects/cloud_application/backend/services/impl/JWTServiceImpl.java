@@ -2,6 +2,7 @@ package com.personal_projects.cloud_application.backend.services.impl;
 
 import com.personal_projects.cloud_application.backend.services.JWTService;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
@@ -63,8 +64,18 @@ public class JWTServiceImpl implements JWTService {
 
     @Override
     public boolean isTokenValid(String token, UserDetails userDetails) {
-        final String username = extractUsername(token);
-        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+        try {
+            final String username = extractUsername(token);
+            return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+        } catch (ExpiredJwtException e) {
+            // Log the exception if necessary
+            System.out.println("Token expired: " + e.getMessage());
+            return false;
+        } catch (Exception e) {
+            // Log the exception if necessary
+            System.out.println("Token validation error: " + e.getMessage());
+            return false;
+        }
     }
 
     private boolean isTokenExpired(String token) {

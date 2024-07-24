@@ -6,9 +6,11 @@ public interface FileService {
 
     String createFolder(String folderName, String path);
 
-    String saveFile(MultipartFile file, String path);
+    Boolean saveFile(MultipartFile file, String path);
 
     String deleteFile(String path);
 
-    public String renameFile(String path, String newName);
+    String renameFile(String path, String newName);
+
+    String changeFilePath(String filePath, String newFileName);
 }
