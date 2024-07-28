@@ -4,13 +4,15 @@ import org.springframework.web.multipart.MultipartFile;
 
 public interface FileService {
 
-    String createFolder(String folderName, String path);
+    boolean createFolder(String folderName, String path);
 
-    Boolean saveFile(MultipartFile file, String path);
+    boolean saveFile(MultipartFile file, String path);
 
-    String deleteFile(String path);
+    boolean deleteFile(String path);
 
-    String renameFile(String path, String newName);
+    boolean renameFile(String path, String newName);
+
+    boolean moveFile(String oldPath, String newPath);
 
     String changeFilePath(String filePath, String newFileName);
 }

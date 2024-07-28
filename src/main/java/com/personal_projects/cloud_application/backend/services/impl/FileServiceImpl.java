@@ -17,17 +17,13 @@ public class FileServiceImpl implements FileService {
     private final static String basePath = "C:/Users/JAHEESE/Documents/cloudstorage/";
 
     @Override
-    public String createFolder(String folderName, String path) {
+    public boolean createFolder(String folderName, String path) {
         File folder = new File(basePath + path + File.separator + folderName);
-        if (folder.mkdirs()) {
-            return "Folder created successfully.";
-        } else {
-            return "Failed to create folder.";
-        }
+        return folder.mkdirs();
     }
 
     @Override
-    public Boolean saveFile(MultipartFile file, String path) {
+    public boolean saveFile(MultipartFile file, String path) {
         if (file.isEmpty()) {
             return false;
         }
@@ -48,35 +44,49 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public String deleteFile(String path) {
-        Path filePath = Paths.get(path);
+    public boolean deleteFile(String path) {
+        Path filePath = Paths.get(basePath + path);
         File file = filePath.toFile();
         if (file.exists()) {
             if (file.delete()) {
-                return "Datei erfolgreich gelöscht";
+                return true;
             } else {
-                return "Fehler beim Löschen der Datei";
+                return false;
             }
         } else {
-            return "Datei nicht gefunden";
+            return false;
         }
     }
 
     @Override
-    public String renameFile(String path, String newName) {
+    public boolean renameFile(String path, String newName) {
         File file = new File(basePath + path);
 
         if (!file.exists()) {
-            return "File or directory does not exist.";
+            return false;
         }
 
         String parentPath = file.getParent();
         File newFile = new File(parentPath + File.separator + newName);
 
         if (file.renameTo(newFile)) {
-            return "File or directory renamed successfully.";
+            return true;
         } else {
-            return "Failed to rename file or directory.";
+            return false;
+        }
+    }
+
+    @Override
+    public boolean moveFile(String oldPath, String newPath) {
+        Path sourcePath = Paths.get(basePath + oldPath);
+        Path destinationPath = Paths.get(basePath + newPath);
+
+        try {
+            Files.move(sourcePath, destinationPath);
+            return true;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
         }
     }
 

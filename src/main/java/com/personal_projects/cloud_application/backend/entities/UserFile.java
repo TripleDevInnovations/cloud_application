@@ -17,9 +17,12 @@ public class UserFile {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "userFile_seq")
     @SequenceGenerator(name = "userFile_seq", sequenceName = "userFile_sequence", allocationSize = 1)
     private int id;
+
     private String fileName;
     private String fileType;
     private Long size;
     private String path;
-    private String user;
+    private int userId;
+    private int folderId;
+
 }

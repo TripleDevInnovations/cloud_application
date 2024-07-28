@@ -4,9 +4,12 @@ import com.personal_projects.cloud_application.backend.dto.JwtAuthenticationResp
 import com.personal_projects.cloud_application.backend.dto.SignInRequest;
 import com.personal_projects.cloud_application.backend.dto.SignUpRequest;
 import com.personal_projects.cloud_application.backend.dto.TokenRequest;
+import com.personal_projects.cloud_application.backend.entities.Folder;
 import com.personal_projects.cloud_application.backend.entities.User;
+import com.personal_projects.cloud_application.backend.repositories.FolderRepo;
 import com.personal_projects.cloud_application.backend.repositories.UserRepo;
 import com.personal_projects.cloud_application.backend.services.AuthenticationService;
+import com.personal_projects.cloud_application.backend.services.FileService;
 import com.personal_projects.cloud_application.backend.services.JWTService;
 
 import java.util.HashMap;
@@ -28,6 +31,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private static final Logger logger = LoggerFactory.getLogger(AuthenticationServiceImpl.class);
 
     private final UserRepo userRepo;
+    private final FolderRepo folderRepo;
+    private final FileService fileService;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JWTService jwtService;
@@ -39,7 +44,25 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             user.setUsername(signUpRequest.getUsername());
             user.setRole(signUpRequest.getRole());
             user.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
-            return userRepo.save(user);
+            user = userRepo.save(user);
+
+            // Erstelle den Root-Ordner für den Benutzer
+            Folder rootFolder = new Folder();
+            rootFolder.setFolderName(signUpRequest.getUsername());
+            rootFolder.setPath(signUpRequest.getUsername());
+            rootFolder.setUserId(user.getId());
+            rootFolder.setParentFolderId(0);
+            rootFolder = folderRepo.save(rootFolder);
+
+            user.setRootFolder(rootFolder);
+
+            // Speichere den Benutzer und den Ordner in der Datenbank
+            user = userRepo.save(user);
+
+            // Erstelle den Ordner im Dateisystem
+            fileService.createFolder(rootFolder.getPath(), "");
+
+            return user;
         }
         return null;
     }

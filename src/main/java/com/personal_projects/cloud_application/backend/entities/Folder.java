@@ -19,11 +19,16 @@ public class Folder {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "folder_seq")
     @SequenceGenerator(name = "folder_seq", sequenceName = "folder_sequence", allocationSize = 1)
     private int id;
+
     private String folderName;
     private String path;
-    @OneToMany(cascade = CascadeType.ALL)
+    private int userId;
+    private int parentFolderId;
+
+    @OneToMany
     private List<Folder> folders;
-    @OneToMany(cascade = CascadeType.ALL)
+
+    @OneToMany
     private List<UserFile> files;
-    private String user;
+
 }

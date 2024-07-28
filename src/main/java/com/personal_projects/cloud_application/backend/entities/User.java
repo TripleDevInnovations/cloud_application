@@ -27,14 +27,15 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_seq")
     @SequenceGenerator(name = "user_seq", sequenceName = "user_sequence", allocationSize = 1)
     private int id;
+
     private String username;
     private String password;
+
+    @Enumerated(EnumType.STRING)
     private Role role;
 
-    @OneToMany(cascade = CascadeType.ALL)
-    private List<Folder> folders;
-    @OneToMany(cascade = CascadeType.ALL)
-    private List<UserFile> files;
+    @OneToOne
+    private Folder rootFolder;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
