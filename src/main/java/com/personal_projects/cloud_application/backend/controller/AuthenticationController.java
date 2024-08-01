@@ -1,22 +1,22 @@
 package com.personal_projects.cloud_application.backend.controller;
 
+import com.personal_projects.cloud_application.backend.services.AuthenticationService;
 import com.personal_projects.cloud_application.backend.dto.JwtAuthenticationResponse;
+import com.personal_projects.cloud_application.backend.services.CommunicationService;
+import com.personal_projects.cloud_application.backend.repositories.UserRepo;
+import com.personal_projects.cloud_application.backend.services.FileService;
+import com.personal_projects.cloud_application.backend.services.JWTService;
 import com.personal_projects.cloud_application.backend.dto.SignInRequest;
 import com.personal_projects.cloud_application.backend.dto.SignUpRequest;
 import com.personal_projects.cloud_application.backend.dto.TokenRequest;
 import com.personal_projects.cloud_application.backend.entities.User;
-import com.personal_projects.cloud_application.backend.repositories.UserRepo;
-import com.personal_projects.cloud_application.backend.services.AuthenticationService;
-import com.personal_projects.cloud_application.backend.services.CommunicationService;
-import com.personal_projects.cloud_application.backend.services.FileService;
-import com.personal_projects.cloud_application.backend.services.JWTService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 
 @RestController
 @RequiredArgsConstructor

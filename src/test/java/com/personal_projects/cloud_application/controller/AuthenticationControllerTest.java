@@ -1,37 +1,40 @@
 package com.personal_projects.cloud_application.controller;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import org.mockito.junit.jupiter.MockitoExtension;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import com.personal_projects.cloud_application.backend.controller.AuthenticationController;
 import com.personal_projects.cloud_application.backend.dto.JwtAuthenticationResponse;
+import com.personal_projects.cloud_application.backend.repositories.UserRepo;
 import com.personal_projects.cloud_application.backend.dto.SignInRequest;
 import com.personal_projects.cloud_application.backend.dto.SignUpRequest;
 import com.personal_projects.cloud_application.backend.dto.TokenRequest;
 import com.personal_projects.cloud_application.backend.entities.Role;
 import com.personal_projects.cloud_application.backend.entities.User;
-import com.personal_projects.cloud_application.backend.repositories.UserRepo;
 import com.personal_projects.cloud_application.backend.services.*;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import org.hamcrest.CoreMatchers;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.junit.jupiter.api.Test;
+import org.hamcrest.CoreMatchers;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.http.MediaType;
 
 @WebMvcTest(controllers = AuthenticationController.class)
 @AutoConfigureMockMvc(addFilters = false)
@@ -132,11 +135,9 @@ public class AuthenticationControllerTest {
         given(communicationService.createErrorMessage(anyString(), anyString()))
                 .willReturn(errorMessage);
 
-        ResultActions response =
-                mockMvc.perform(
-                        post("/signup")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(signUpRequest)));
+        ResultActions response = mockMvc.perform(post("/signup")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(signUpRequest)));
         response
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())

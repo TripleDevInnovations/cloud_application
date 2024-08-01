@@ -1,10 +1,10 @@
 package com.personal_projects.cloud_application.backend.entities;
 
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.NoArgsConstructor;
+import jakarta.persistence.*;
 import lombok.ToString;
+import lombok.Data;
 
 import java.util.List;
 

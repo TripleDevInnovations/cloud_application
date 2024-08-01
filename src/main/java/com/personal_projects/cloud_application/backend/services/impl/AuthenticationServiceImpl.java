@@ -1,27 +1,27 @@
 package com.personal_projects.cloud_application.backend.services.impl;
 
+import com.personal_projects.cloud_application.backend.services.AuthenticationService;
 import com.personal_projects.cloud_application.backend.dto.JwtAuthenticationResponse;
+import com.personal_projects.cloud_application.backend.repositories.FolderRepo;
+import com.personal_projects.cloud_application.backend.repositories.UserRepo;
+import com.personal_projects.cloud_application.backend.services.FileService;
+import com.personal_projects.cloud_application.backend.services.JWTService;
 import com.personal_projects.cloud_application.backend.dto.SignInRequest;
 import com.personal_projects.cloud_application.backend.dto.SignUpRequest;
 import com.personal_projects.cloud_application.backend.dto.TokenRequest;
 import com.personal_projects.cloud_application.backend.entities.Folder;
 import com.personal_projects.cloud_application.backend.entities.User;
-import com.personal_projects.cloud_application.backend.repositories.FolderRepo;
-import com.personal_projects.cloud_application.backend.repositories.UserRepo;
-import com.personal_projects.cloud_application.backend.services.AuthenticationService;
-import com.personal_projects.cloud_application.backend.services.FileService;
-import com.personal_projects.cloud_application.backend.services.JWTService;
 
 import java.util.HashMap;
 
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.authentication.AuthenticationManager;
+import org.slf4j.Logger;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Service;
 
 @Service
