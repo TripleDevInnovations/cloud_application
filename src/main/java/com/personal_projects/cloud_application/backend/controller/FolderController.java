@@ -1,5 +1,6 @@
 package com.personal_projects.cloud_application.backend.controller;
 
+import com.personal_projects.cloud_application.backend.entities.UserFile;
 import com.personal_projects.cloud_application.backend.repositories.UserFileRepo;
 import com.personal_projects.cloud_application.backend.repositories.FolderRepo;
 import com.personal_projects.cloud_application.backend.repositories.UserRepo;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,10 +35,10 @@ public class FolderController {
     private FileService fileService;
 
     @PostMapping("/folder")
-    public ResponseEntity<?> createFolder(@PathVariable String username, @RequestHeader("Authorization") String token, @RequestParam("id") int folderId, @RequestParam("foldername") String folderName) {
+    public ResponseEntity<?> createFolder(@PathVariable String username, @RequestHeader("Authorization") String token, @RequestParam("id") int parentFolderId, @RequestParam("foldername") String folderName) {
         Optional<User> optionalUser = userRepo.findByUsername(username);
         if (optionalUser.isPresent() && jwtService.isTokenValid(token, optionalUser.get())) {
-            Optional<Folder> optionalFolder = folderRepo.findById(folderId);
+            Optional<Folder> optionalFolder = folderRepo.findById(parentFolderId);
             int userId = optionalUser.get().getId();
             if (optionalFolder.isPresent() && optionalFolder.get().getUserId() == userId) {
                 Folder folder = optionalFolder.get();
@@ -46,16 +48,12 @@ public class FolderController {
                 newFolder.setFolderName(folderName);
                 newFolder.setUserId(userId);
                 newFolder.setParentFolderId(folder.getId());
-                newFolder.setPath(folder.getPath() + "/" + folderName);
                 newFolder = folderRepo.save(newFolder);
                 folders.add(newFolder);
                 folder.setFolders(folders);
                 folderRepo.save(folder);
-                if (fileService.createFolder(folderName, folder.getPath())) {
-                    return ResponseEntity.ok().build();
-                } else {
-                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Fehler beim Erstellen des Ordners im Dateisystem");
-                }
+
+                return ResponseEntity.ok().build();
             } else {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Übergeordneter Ordner nicht gefunden oder Benutzer nicht berechtigt");
             }
@@ -88,14 +86,9 @@ public class FolderController {
             int userId = optionalUser.get().getId();
             if (optionalFolder.isPresent() && optionalFolder.get().getUserId() == userId) {
                 Folder folder = optionalFolder.get();
-                if (fileService.renameFile(folder.getPath(), newFolderName)) {
-                    folder.setFolderName(newFolderName);
-                    folder.setPath(fileService.changeFilePath(folder.getPath(), newFolderName));
-                    folderRepo.save(folder);
-                    return ResponseEntity.ok(optionalFolder.get());
-                } else {
-                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Fehler beim umbenennen des Ordners im Dateisystem");
-                }
+                folder.setFolderName(newFolderName);
+                folderRepo.save(folder);
+                return ResponseEntity.ok(optionalFolder.get());
             } else {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Übergeordneter Ordner nicht gefunden oder Benutzer nicht berechtigt");
             }
@@ -116,7 +109,6 @@ public class FolderController {
                 Folder newFolder = optionalNewFolder.get();
                 Optional<Folder> optionalOldParentFolder = folderRepo.findById(folder.getParentFolderId());
                 if (optionalOldParentFolder.isPresent() && optionalOldParentFolder.get().getUserId() == userId) {
-                    if (fileService.moveFile(folder.getPath(), newFolder.getPath() + "/" + folder.getFolderName())) {
                     //delete from folder list from old parent-folder with parentFolderId from old Folder
                         Folder oldParentFolder = optionalOldParentFolder.get();
                         List<Folder> oldFolders = oldParentFolder.getFolders();
@@ -124,17 +116,12 @@ public class FolderController {
                         oldParentFolder.setFolders(oldFolders);
                         folderRepo.save(oldParentFolder);
                         //change path
-                        folder.setPath(newFolder.getPath() + "/" + folder.getFolderName());
                         folder.setParentFolderId(newFolder.getId());
-
                         List<Folder> newFolders = newFolder.getFolders();
                         newFolders.add(folder);
                         newFolder.setFolders(newFolders);
                         folderRepo.save(newFolder);
                         return ResponseEntity.ok().build();
-                    } else {
-                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Fehler beim Verschieben des Ordners im Dateisystem");
-                    }
                 } else {
                     return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Alter Elternordner nicht gefunden oder Benutzer nicht berechtigt");
                 }
@@ -150,7 +137,61 @@ public class FolderController {
     public ResponseEntity<?> deleteFolder(@PathVariable String username, @RequestHeader("Authorization") String token, @RequestParam("id") int id) {
         Optional<User> optionalUser = userRepo.findByUsername(username);
         if (optionalUser.isPresent() && jwtService.isTokenValid(token, optionalUser.get())) {
-            Optional<Folder>
+            Optional<Folder> optionalFolder = folderRepo.findById(id);
+            if (optionalFolder.isPresent() && optionalFolder.get().getUserId() == optionalUser.get().getId()) {
+                Folder folder = optionalFolder.get();
+                deleteSubFolders(folder);
+                folderRepo.delete(folder);
+                return ResponseEntity.ok().build();
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Ordner nicht gefunden oder Benutzer nicht berechtigt");
+            }
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Benutzer nicht gefunden oder Token ungültig");
+        }
+    }
+
+    private void deleteSubFolders(Folder folder) {
+        if (folder != null) {
+            boolean saveFolder = false;
+            List<Folder> folders = folder.getFolders();
+            List<UserFile> files = folder.getFiles();
+
+            if (!files.isEmpty()) {
+                for (UserFile file : files) {
+                    fileService.deleteFile(file.getId() + "." + fileService.getFileExtension(file.getFileName()));
+                    userFileRepo.delete(file);
+                }
+                folder.setFiles(new ArrayList<>());
+                saveFolder = true;
+            }
+
+            if (!folders.isEmpty()) {
+                for (Folder O : folders) {
+                    deleteSubFolders(O);
+                    folderRepo.delete(O);
+                }
+                folder.setFolders(new ArrayList<>());
+                saveFolder = true;
+            }
+
+            if (saveFolder) {
+                folderRepo.save(folder);
+            }
         }
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+

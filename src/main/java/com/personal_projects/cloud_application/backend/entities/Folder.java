@@ -21,7 +21,6 @@ public class Folder {
     private int id;
 
     private String folderName;
-    private String path;
     private int userId;
     private int parentFolderId;
 

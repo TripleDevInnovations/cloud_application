@@ -15,4 +15,6 @@ public interface FileService {
     boolean moveFile(String oldPath, String newPath);
 
     String changeFilePath(String filePath, String newFileName);
+
+    String getFileExtension(String input);
 }

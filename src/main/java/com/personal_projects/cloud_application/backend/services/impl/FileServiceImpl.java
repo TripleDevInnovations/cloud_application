@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class FileServiceImpl implements FileService {
 
-    private final static String basePath = "C:/Users/JAHEESE/Documents/cloudstorage/";
+    private final static String basePath = "C:/Users/fjuic/Documents/cloudstorage/";
 
     @Override
     public boolean createFolder(String folderName, String path) {
@@ -112,4 +112,14 @@ public class FileServiceImpl implements FileService {
 
         return directoryPath + newFileName;
     }
+
+    @Override
+    public String getFileExtension(String input) {
+        if (input == null || !input.contains(".")) {
+            return null;
+        }
+        return input.substring(input.lastIndexOf('.') + 1);
+    }
+
+
 }
