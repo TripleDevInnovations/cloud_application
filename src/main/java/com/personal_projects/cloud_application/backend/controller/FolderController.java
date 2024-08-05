@@ -86,9 +86,13 @@ public class FolderController {
             int userId = optionalUser.get().getId();
             if (optionalFolder.isPresent() && optionalFolder.get().getUserId() == userId) {
                 Folder folder = optionalFolder.get();
-                folder.setFolderName(newFolderName);
-                folderRepo.save(folder);
-                return ResponseEntity.ok(optionalFolder.get());
+                if (folder.getParentFolderId() != 0) {
+                    folder.setFolderName(newFolderName);
+                    folderRepo.save(folder);
+                    return ResponseEntity.ok(optionalFolder.get());
+                } else {
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Dieser Ordner darf nicht umbenannt werden.");
+                }
             } else {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Übergeordneter Ordner nicht gefunden oder Benutzer nicht berechtigt");
             }
@@ -106,25 +110,29 @@ public class FolderController {
             int userId = optionalUser.get().getId();
             if (optionalFolder.isPresent() && optionalNewFolder.isPresent() && optionalFolder.get().getUserId() == userId && optionalNewFolder.get().getUserId() == userId) {
                 Folder folder = optionalFolder.get();
-                Folder newFolder = optionalNewFolder.get();
-                Optional<Folder> optionalOldParentFolder = folderRepo.findById(folder.getParentFolderId());
-                if (optionalOldParentFolder.isPresent() && optionalOldParentFolder.get().getUserId() == userId) {
-                    //delete from folder list from old parent-folder with parentFolderId from old Folder
-                        Folder oldParentFolder = optionalOldParentFolder.get();
-                        List<Folder> oldFolders = oldParentFolder.getFolders();
-                        oldFolders.remove(folder);
-                        oldParentFolder.setFolders(oldFolders);
-                        folderRepo.save(oldParentFolder);
-                        //change path
-                        folder.setParentFolderId(newFolder.getId());
-                        List<Folder> newFolders = newFolder.getFolders();
-                        newFolders.add(folder);
-                        newFolder.setFolders(newFolders);
-                        folderRepo.save(newFolder);
-                        return ResponseEntity.ok().build();
-                } else {
-                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Alter Elternordner nicht gefunden oder Benutzer nicht berechtigt");
-                }
+                    if (folder.getParentFolderId() != 0) {
+                        Folder newFolder = optionalNewFolder.get();
+                        Optional<Folder> optionalOldParentFolder = folderRepo.findById(folder.getParentFolderId());
+                        if (optionalOldParentFolder.isPresent() && optionalOldParentFolder.get().getUserId() == userId) {
+                            //delete from folder list from old parent-folder with parentFolderId from old Folder
+                            Folder oldParentFolder = optionalOldParentFolder.get();
+                            List<Folder> oldFolders = oldParentFolder.getFolders();
+                            oldFolders.remove(folder);
+                            oldParentFolder.setFolders(oldFolders);
+                            folderRepo.save(oldParentFolder);
+                            //change path
+                            folder.setParentFolderId(newFolder.getId());
+                            List<Folder> newFolders = newFolder.getFolders();
+                            newFolders.add(folder);
+                            newFolder.setFolders(newFolders);
+                            folderRepo.save(newFolder);
+                            return ResponseEntity.ok().build();
+                        } else {
+                            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Alter Elternordner nicht gefunden oder Benutzer nicht berechtigt");
+                        }
+                    } else {
+                        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Dieser Ordner darf nicht verschoben werden.");
+                    }
             } else {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Ordner oder neuer Elternordner nicht gefunden oder Benutzer nicht berechtigt");
             }
@@ -138,14 +146,18 @@ public class FolderController {
         Optional<User> optionalUser = userRepo.findByUsername(username);
         if (optionalUser.isPresent() && jwtService.isTokenValid(token, optionalUser.get())) {
             Optional<Folder> optionalFolder = folderRepo.findById(id);
-            if (optionalFolder.isPresent() && optionalFolder.get().getUserId() == optionalUser.get().getId()) {
-                Folder folder = optionalFolder.get();
-                deleteSubFolders(folder);
-                folderRepo.delete(folder);
-                return ResponseEntity.ok().build();
+                if (optionalFolder.isPresent() && optionalFolder.get().getUserId() == optionalUser.get().getId()) {
+                    Folder folder = optionalFolder.get();
+                    if (folder.getParentFolderId() != 0) {
+                    deleteSubFolders(folder);
+                    folderRepo.delete(folder);
+                    return ResponseEntity.ok().build();
+                } else {
+                        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Dieser Ordner darf nicht gelöscht werden.");
+                    }
             } else {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Ordner nicht gefunden oder Benutzer nicht berechtigt");
-            }
+                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Ordner nicht gefunden oder Benutzer nicht berechtigt");
+                }
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Benutzer nicht gefunden oder Token ungültig");
         }

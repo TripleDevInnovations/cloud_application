@@ -4,22 +4,10 @@
    wann letztes Backup war und wenn länger 7 Tage -> Backup
  - 1.
 
-DirectoryFileService:
-    - move to path
-    - show elements
-    - upload File
-    - create File
-    - rename File
-    - move element
 
-Controller:
-    - /login
-    - /{user}
-    - /{user}/{path}
-    - /{user}/{path}/download
-    - /{user}/{path}/upload
-    - /{user}/{path}/move
-    - /{user}/{path}/rename
+
+1. Relative Pfade verwenden
+Anstatt absolute Pfade zu speichern, könntest du relative Pfade verwenden. Das bedeutet, dass jeder Ordner nur seinen eigenen Namen und eine Referenz zu seinem übergeordneten Ordner speichert. Der vollständige Pfad kann dann zur Laufzeit konstruiert werden.
 
 
 

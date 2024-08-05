@@ -49,7 +49,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             // Erstelle den Root-Ordner für den Benutzer
             Folder rootFolder = new Folder();
             rootFolder.setFolderName(signUpRequest.getUsername());
-//            rootFolder.setPath(signUpRequest.getUsername());
             rootFolder.setUserId(user.getId());
             rootFolder.setParentFolderId(0);
             rootFolder = folderRepo.save(rootFolder);
@@ -58,10 +57,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
             // Speichere den Benutzer und den Ordner in der Datenbank
             user = userRepo.save(user);
-
-            // Erstelle den Ordner im Dateisystem
-//            fileService.createFolder(rootFolder.getPath(), "");
-
             return user;
         }
         return null;

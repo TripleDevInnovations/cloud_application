@@ -40,7 +40,7 @@ public class AuthenticationController {
         }
         User user = authenticationService.signUp(signUpRequest);
         if (user != null) {
-            fileService.createFolder(user.getUsername(), "");
+            fileService.createFolder(String.valueOf(user.getId()), "");
             return ResponseEntity.ok(user);
         } else {
             return ResponseEntity.badRequest().body(communicationService.createErrorMessage(
