@@ -36,38 +36,38 @@ public class UserFileController {
 
     private final static String basePath = "C:/Users/JAHEESE/Documents/cloudstorage/";
 
-//    @PostMapping("/file")
-//    public ResponseEntity<?> createFile(@PathVariable String username, @RequestHeader("Authorization") String token, @RequestParam("id") int folderId, @RequestParam("file") MultipartFile file) {
-//        Optional<User> optionalUser = userRepo.findByUsername(username);
-//        if (optionalUser.isPresent() && jwtService.isTokenValid(token, optionalUser.get()) && !file.isEmpty()) {
-//            Optional<Folder> optionalFolder = folderRepo.findById(folderId);
-//            if(optionalFolder.isPresent() && optionalFolder.get().getUser().equals(username)) {
-//                User user = optionalUser.get();
-//                Folder folder = optionalFolder.get();
-//
-//                UserFile userFile = new UserFile();
-//                userFile.setFileName(file.getOriginalFilename());
-//                userFile.setFileType(file.getContentType());
-//                userFile.setSize(file.getSize());
-//                userFile.setPath(folder.getPath() + "/" + userFile.getFileName());
-//                userFile.setFolderId(folderId);
-//                userFile.setUser(username);
-//
-//                if (fileService.saveFile(file, userFile.getPath())) {
-//                    List<UserFile> files = folder.getFiles();
-//                    files.add(userFile);
-//                    folder.setFiles(files);
-//                    folderRepo.save(folder);
-//                    return ResponseEntity.ok(user);
-//                } else {
-//                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("File could not be saved");
-//                }
-//            } else {
-//                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User does not have access to this folder");
-//            }
-//        }
-//        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token or file is empty");
-//    }
+    @PostMapping("/file")
+    public ResponseEntity<?> createFile(@PathVariable String username, @RequestHeader("Authorization") String token, @RequestParam("id") int folderId, @RequestParam("file") MultipartFile file) {
+        Optional<User> optionalUser = userRepo.findByUsername(username);
+        if (optionalUser.isPresent() && jwtService.isTokenValid(token, optionalUser.get()) && !file.isEmpty()) {
+            User user = optionalUser.get();
+            Optional<Folder> optionalFolder = folderRepo.findById(folderId);
+            if(optionalFolder.isPresent() && optionalFolder.get().getUserId() == user.getId()) {
+                Folder folder = optionalFolder.get();
+
+                UserFile userFile = new UserFile();
+                userFile.setFileName(file.getOriginalFilename());
+                userFile.setFileType(file.getContentType());
+                userFile.setSize(file.getSize());
+                userFile.setFolderId(folderId);
+                userFile.setUserId(user.getId());
+                userFile = userFileRepo.save(userFile);
+
+                if (fileService.saveFile(file, user.getId() + "/" + folder.getId() + "." + fileService.getFileExtension(userFile.getFileName()))) {
+                    List<UserFile> files = folder.getFiles();
+                    files.add(userFile);
+                    folder.setFiles(files);
+                    return ResponseEntity.ok(user);
+                } else {
+                    userFileRepo.delete(userFile);
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("File could not be saved");
+                }
+            } else {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User does not have access to this folder");
+            }
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token or file is empty");
+    }
 
 //    @GetMapping("/file")
 //    public ResponseEntity<UserFile> readFile(@PathVariable String username, @RequestHeader("Authorization") String token, @RequestParam("id") int fileId) {

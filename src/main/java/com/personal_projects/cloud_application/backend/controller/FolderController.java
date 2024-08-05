@@ -146,18 +146,18 @@ public class FolderController {
         Optional<User> optionalUser = userRepo.findByUsername(username);
         if (optionalUser.isPresent() && jwtService.isTokenValid(token, optionalUser.get())) {
             Optional<Folder> optionalFolder = folderRepo.findById(id);
-                if (optionalFolder.isPresent() && optionalFolder.get().getUserId() == optionalUser.get().getId()) {
-                    Folder folder = optionalFolder.get();
-                    if (folder.getParentFolderId() != 0) {
+            if (optionalFolder.isPresent() && optionalFolder.get().getUserId() == optionalUser.get().getId()) {
+                Folder folder = optionalFolder.get();
+                if (folder.getParentFolderId() != 0) {
                     deleteSubFolders(folder);
                     folderRepo.delete(folder);
                     return ResponseEntity.ok().build();
                 } else {
                         return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Dieser Ordner darf nicht gelöscht werden.");
-                    }
+                }
             } else {
                     return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Ordner nicht gefunden oder Benutzer nicht berechtigt");
-                }
+            }
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Benutzer nicht gefunden oder Token ungültig");
         }
