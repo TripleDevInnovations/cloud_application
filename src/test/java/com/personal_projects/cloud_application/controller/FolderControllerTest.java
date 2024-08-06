@@ -1,42 +1,42 @@
 package com.personal_projects.cloud_application.controller;
-import static org.hamcrest.CoreMatchers.is;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.personal_projects.cloud_application.backend.controller.AuthenticationController;
-import com.personal_projects.cloud_application.backend.controller.FolderController;
-import com.personal_projects.cloud_application.backend.entities.Folder;
-import com.personal_projects.cloud_application.backend.entities.User;
-import com.personal_projects.cloud_application.backend.repositories.FolderRepo;
-import com.personal_projects.cloud_application.backend.repositories.UserFileRepo;
-import com.personal_projects.cloud_application.backend.repositories.UserRepo;
-import com.personal_projects.cloud_application.backend.services.*;
-import org.hamcrest.CoreMatchers;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
-import static org.mockito.Mockito.mock;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
+import com.personal_projects.cloud_application.backend.controller.FolderController;
+import com.personal_projects.cloud_application.backend.repositories.UserFileRepo;
+import com.personal_projects.cloud_application.backend.repositories.FolderRepo;
+import com.personal_projects.cloud_application.backend.repositories.UserRepo;
+import com.personal_projects.cloud_application.backend.entities.Folder;
+import com.personal_projects.cloud_application.backend.entities.User;
+import com.personal_projects.cloud_application.backend.services.*;
+import com.personal_projects.cloud_application.CloudApplication;
+
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.MockMvc;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.Test;
+
+import org.mockito.junit.jupiter.MockitoExtension;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
-@WebMvcTest(controllers = FolderController.class)
+import java.util.ArrayList;
+import java.util.Optional;
+import java.util.List;
+
+@WebMvcTest(controllers = {FolderController.class})
 @AutoConfigureMockMvc(addFilters = false)
 @ExtendWith(MockitoExtension.class)
 public class FolderControllerTest {
@@ -71,12 +71,30 @@ public class FolderControllerTest {
     @MockBean
     private FileService fileService;
 
+    @MockBean
+    private CloudApplication cloudApplication;
+
+    @Test
+    public void folderController_crateFolder_ReturnsBadRequest() throws Exception {
+        given(userRepo.findByUsername(anyString())).willReturn(Optional.empty());
+        given(jwtService.isTokenValid(anyString(), any(User.class))).willReturn(true);
+        given(folderRepo.findById(anyInt())).willReturn(Optional.empty());
+
+        ResultActions response = mockMvc.perform(post("/testuser/folder")
+                .header("Authorization", "validToken")
+                .param("id", "1")
+                .param("foldername", ""));
+
+        response.andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andExpect(content().string("Ordnername darf nicht leer sein"));
+    }
+
     @Test
     public void folderController_crateFolder_ReturnsUnauthorized() throws Exception {
         given(userRepo.findByUsername(anyString())).willReturn(Optional.empty());
         given(jwtService.isTokenValid(anyString(), any(User.class))).willReturn(true);
         given(folderRepo.findById(anyInt())).willReturn(Optional.empty());
-        given(fileService.createFolder(anyString(), anyString())).willReturn(true);
 
         ResultActions response = mockMvc.perform(post("/testuser/folder")
                 .header("Authorization", "validToken")
@@ -93,7 +111,6 @@ public class FolderControllerTest {
         given(userRepo.findByUsername(anyString())).willReturn(Optional.of(new User()));
         given(jwtService.isTokenValid(anyString(), any(User.class))).willReturn(false);
         given(folderRepo.findById(anyInt())).willReturn(Optional.empty());
-        given(fileService.createFolder(anyString(), anyString())).willReturn(true);
 
         ResultActions response = mockMvc.perform(post("/testuser/folder")
                 .header("Authorization", "validToken")
@@ -110,7 +127,6 @@ public class FolderControllerTest {
         given(userRepo.findByUsername(anyString())).willReturn(Optional.of(new User()));
         given(jwtService.isTokenValid(anyString(), any(User.class))).willReturn(true);
         given(folderRepo.findById(anyInt())).willReturn(Optional.empty());
-        given(fileService.createFolder(anyString(), anyString())).willReturn(true);
 
         ResultActions response = mockMvc.perform(post("/testuser/folder")
                 .header("Authorization", "validToken")
@@ -131,7 +147,6 @@ public class FolderControllerTest {
         given(userRepo.findByUsername(anyString())).willReturn(Optional.of(user));
         given(jwtService.isTokenValid(anyString(), any(User.class))).willReturn(true);
         given(folderRepo.findById(anyInt())).willReturn(Optional.of(folder));
-        given(fileService.createFolder(anyString(), anyString())).willReturn(true);
 
         ResultActions response = mockMvc.perform(post("/testuser/folder")
                 .header("Authorization", "validToken")
@@ -144,7 +159,7 @@ public class FolderControllerTest {
     }
 
     @Test
-    public void folderController_crateFolder_ReturnsInternalServerError() throws Exception {
+    public void  folderController_createFolder_ReturnsInternalServerError() throws Exception {
         User mockUser = new User();
         List<Folder> folders = new ArrayList<>();
         Folder mockFolder = new Folder();
@@ -152,7 +167,8 @@ public class FolderControllerTest {
         given(userRepo.findByUsername(anyString())).willReturn(Optional.of(mockUser));
         given(jwtService.isTokenValid(anyString(), any(User.class))).willReturn(true);
         given(folderRepo.findById(anyInt())).willReturn(Optional.of(mockFolder));
-        given(fileService.createFolder(anyString(), anyString())).willReturn(false);
+
+        given(folderRepo.save(any())).willThrow(new RuntimeException("Fehler beim Speichern des Ordners"));
 
         ResultActions response = mockMvc.perform(post("/testuser/folder")
                 .header("Authorization", "validToken")
@@ -161,7 +177,7 @@ public class FolderControllerTest {
 
         response.andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isInternalServerError())
-                .andExpect(content().string("Fehler beim Erstellen des Ordners im Dateisystem"));
+                .andExpect(content().string("Fehler beim Speichern des Ordners"));
     }
 
     @Test
@@ -170,11 +186,9 @@ public class FolderControllerTest {
         List<Folder> folders = new ArrayList<>();
         Folder mockFolder = new Folder();
         mockFolder.setFolders(folders);
-        mockFolder.setPath("");
         given(userRepo.findByUsername(anyString())).willReturn(Optional.of(mockUser));
         given(jwtService.isTokenValid(anyString(), any(User.class))).willReturn(true);
         given(folderRepo.findById(anyInt())).willReturn(Optional.of(mockFolder));
-        given(fileService.createFolder(anyString(), anyString())).willReturn(true);
 
         ResultActions response = mockMvc.perform(post("/testuser/folder")
                 .header("Authorization", "validToken")
@@ -184,10 +198,10 @@ public class FolderControllerTest {
         response.andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }
-
-
-
-
+//
+//
+//
+//
     @Test
     public void folderController_readFolder_ReturnsUnauthorized() throws Exception {
         given(userRepo.findByUsername(anyString())).willReturn(Optional.empty());
@@ -275,13 +289,26 @@ public class FolderControllerTest {
 
 
 
+    @Test
+    public void folderController_updateFolder_ReturnsBadRequest() throws Exception {
+        given(userRepo.findByUsername(anyString())).willReturn(Optional.empty());
+        given(jwtService.isTokenValid(anyString(), any(User.class))).willReturn(true);
+        given(folderRepo.findById(anyInt())).willReturn(Optional.empty());
 
+        ResultActions response = mockMvc.perform(put("/testuser/folder")
+                .header("Authorization", "validToken")
+                .param("id", "1")
+                .param("newname", ""));
+
+        response.andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andExpect(content().string("Neuer Ordnername darf nicht leer sein"));
+    }
     @Test
     public void folderController_updateFolder_ReturnsUnauthorized() throws Exception {
         given(userRepo.findByUsername(anyString())).willReturn(Optional.empty());
         given(jwtService.isTokenValid(anyString(), any(User.class))).willReturn(true);
         given(folderRepo.findById(anyInt())).willReturn(Optional.empty());
-        given(fileService.renameFile(anyString(), anyString())).willReturn(true);
 
         ResultActions response = mockMvc.perform(put("/testuser/folder")
                 .header("Authorization", "validToken")
@@ -298,7 +325,6 @@ public class FolderControllerTest {
         given(userRepo.findByUsername(anyString())).willReturn(Optional.of(new User()));
         given(jwtService.isTokenValid(anyString(), any(User.class))).willReturn(false);
         given(folderRepo.findById(anyInt())).willReturn(Optional.empty());
-        given(fileService.renameFile(anyString(), anyString())).willReturn(true);
 
         ResultActions response = mockMvc.perform(put("/testuser/folder")
                 .header("Authorization", "validToken")
@@ -315,7 +341,6 @@ public class FolderControllerTest {
         given(userRepo.findByUsername(anyString())).willReturn(Optional.of(new User()));
         given(jwtService.isTokenValid(anyString(), any(User.class))).willReturn(true);
         given(folderRepo.findById(anyInt())).willReturn(Optional.empty());
-        given(fileService.renameFile(anyString(), anyString())).willReturn(true);
 
         ResultActions response = mockMvc.perform(put("/testuser/folder")
                 .header("Authorization", "validToken")
@@ -336,7 +361,6 @@ public class FolderControllerTest {
         given(userRepo.findByUsername(anyString())).willReturn(Optional.of(user));
         given(jwtService.isTokenValid(anyString(), any(User.class))).willReturn(true);
         given(folderRepo.findById(anyInt())).willReturn(Optional.of(folder));
-        given(fileService.renameFile(anyString(), anyString())).willReturn(true);
 
         ResultActions response = mockMvc.perform(put("/testuser/folder")
                 .header("Authorization", "validToken")
@@ -349,15 +373,37 @@ public class FolderControllerTest {
     }
 
     @Test
+    public void folderController_updateFolder_ReturnsForbidden() throws Exception {
+        User user = new User();
+        user.setId(1);
+        Folder folder = new Folder();
+        folder.setUserId(1);
+        folder.setParentFolderId(0);
+        given(userRepo.findByUsername(anyString())).willReturn(Optional.of(user));
+        given(jwtService.isTokenValid(anyString(), any(User.class))).willReturn(true);
+        given(folderRepo.findById(anyInt())).willReturn(Optional.of(folder));
+
+        ResultActions response = mockMvc.perform(put("/testuser/folder")
+                .header("Authorization", "validToken")
+                .param("id", "1")
+                .param("newname", "foldername"));
+
+        response.andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isForbidden())
+                .andExpect(content().string("Dieser Ordner darf nicht umbenannt werden."));
+    }
+
+    @Test
     public void folderController_updateFolder_ReturnsInternalServerError() throws Exception {
         User user = new User();
         user.setId(1);
         Folder folder = new Folder();
         folder.setUserId(1);
+        folder.setParentFolderId(1);
         given(userRepo.findByUsername(anyString())).willReturn(Optional.of(user));
         given(jwtService.isTokenValid(anyString(), any(User.class))).willReturn(true);
         given(folderRepo.findById(anyInt())).willReturn(Optional.of(folder));
-        given(fileService.renameFile(anyString(), anyString())).willReturn(false);
+        given(folderRepo.save(any())).willThrow(new RuntimeException());
 
         ResultActions response = mockMvc.perform(put("/testuser/folder")
                 .header("Authorization", "validToken")
@@ -366,7 +412,7 @@ public class FolderControllerTest {
 
         response.andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isInternalServerError())
-                .andExpect(content().string("Fehler beim umbenennen des Ordners im Dateisystem"));
+                .andExpect(content().string("Fehler beim Speichern des Ordners"));
     }
 
     @Test
@@ -375,12 +421,10 @@ public class FolderControllerTest {
         user.setId(1);
         Folder folder = new Folder();
         folder.setUserId(1);
-        folder.setPath("");
+        folder.setParentFolderId(1);
         given(userRepo.findByUsername(anyString())).willReturn(Optional.of(user));
         given(jwtService.isTokenValid(anyString(), any(User.class))).willReturn(true);
         given(folderRepo.findById(anyInt())).willReturn(Optional.of(folder));
-        given(fileService.renameFile(anyString(), anyString())).willReturn(true );
-        given(fileService.changeFilePath(anyString(), anyString())).willReturn("testPath");
 
         ResultActions response = mockMvc.perform(put("/testuser/folder")
                 .header("Authorization", "validToken")
@@ -388,8 +432,7 @@ public class FolderControllerTest {
                 .param("newname", "foldername"));
 
         response.andDo(MockMvcResultHandlers.print())
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(jsonPath("$.path").value("testPath"));
+                .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
 
@@ -400,8 +443,6 @@ public class FolderControllerTest {
         given(userRepo.findByUsername(anyString())).willReturn(Optional.empty());
         given(jwtService.isTokenValid(anyString(), any(User.class))).willReturn(true);
         given(folderRepo.findById(anyInt())).willReturn(Optional.empty());
-        given(fileService.renameFile(anyString(), anyString())).willReturn(true );
-        given(fileService.changeFilePath(anyString(), anyString())).willReturn("testPath");
 
         ResultActions response = mockMvc.perform(put("/testuser/movefolder")
                 .header("Authorization", "validToken")
@@ -418,8 +459,6 @@ public class FolderControllerTest {
         given(userRepo.findByUsername(anyString())).willReturn(Optional.of(new User()));
         given(jwtService.isTokenValid(anyString(), any(User.class))).willReturn(false);
         given(folderRepo.findById(anyInt())).willReturn(Optional.empty());
-        given(fileService.renameFile(anyString(), anyString())).willReturn(true );
-        given(fileService.changeFilePath(anyString(), anyString())).willReturn("testPath");
 
         ResultActions response = mockMvc.perform(put("/testuser/movefolder")
                 .header("Authorization", "validToken")
@@ -436,8 +475,6 @@ public class FolderControllerTest {
         given(userRepo.findByUsername(anyString())).willReturn(Optional.of(new User()));
         given(jwtService.isTokenValid(anyString(), any(User.class))).willReturn(true);
         given(folderRepo.findById(anyInt())).willReturn(Optional.empty());
-        given(fileService.renameFile(anyString(), anyString())).willReturn(true );
-        given(fileService.changeFilePath(anyString(), anyString())).willReturn("testPath");
 
         ResultActions response = mockMvc.perform(put("/testuser/movefolder")
                 .header("Authorization", "validToken")
@@ -459,7 +496,6 @@ public class FolderControllerTest {
         given(userRepo.findByUsername(anyString())).willReturn(Optional.of(user));
         given(jwtService.isTokenValid(anyString(), any(User.class))).willReturn(true);
         given(folderRepo.findById(anyInt())).willReturn(Optional.of(folder));
-        given(fileService.renameFile(anyString(), anyString())).willReturn(true );
 
         ResultActions response = mockMvc.perform(put("/testuser/movefolder")
                 .header("Authorization", "validToken")
@@ -479,27 +515,55 @@ public class FolderControllerTest {
         Folder folder = new Folder();
         folder.setId(1);
         folder.setUserId(1);
-        folder.setParentFolderId(2);
-        folder.setPath("oldPath");
+        folder.setParentFolderId(0);
 
         Folder newParentFolder = new Folder();
         newParentFolder.setId(3);
         newParentFolder.setUserId(1);
-        newParentFolder.setPath("newPath");
 
         Folder oldParentFolder = new Folder();
         oldParentFolder.setId(2);
         oldParentFolder.setUserId(1);
-        oldParentFolder.setPath("oldParentPath");
 
         given(userRepo.findByUsername(anyString())).willReturn(Optional.of(user));
         given(jwtService.isTokenValid(anyString(), any(User.class))).willReturn(true);
-
         given(folderRepo.findById(1)).willReturn(Optional.of(folder));
         given(folderRepo.findById(3)).willReturn(Optional.of(newParentFolder));
         given(folderRepo.findById(2)).willReturn(Optional.empty());
 
-        given(fileService.moveFile(anyString(), anyString())).willReturn(true);
+        ResultActions response = mockMvc.perform(put("/testuser/movefolder")
+                .header("Authorization", "validToken")
+                .param("id", "1")
+                .param("moveid", "3"));
+
+        response.andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isForbidden())
+                .andExpect(content().string("Dieser Ordner darf nicht verschoben werden."));
+    }
+
+    @Test
+    public void folderController_moveFolder_ReturnsForbidden2() throws Exception {
+        User user = new User();
+        user.setId(1);
+
+        Folder folder = new Folder();
+        folder.setId(1);
+        folder.setUserId(1);
+        folder.setParentFolderId(2);
+
+        Folder newParentFolder = new Folder();
+        newParentFolder.setId(3);
+        newParentFolder.setUserId(1);
+
+        Folder oldParentFolder = new Folder();
+        oldParentFolder.setId(2);
+        oldParentFolder.setUserId(1);
+
+        given(userRepo.findByUsername(anyString())).willReturn(Optional.of(user));
+        given(jwtService.isTokenValid(anyString(), any(User.class))).willReturn(true);
+        given(folderRepo.findById(1)).willReturn(Optional.of(folder));
+        given(folderRepo.findById(3)).willReturn(Optional.of(newParentFolder));
+        given(folderRepo.findById(2)).willReturn(Optional.empty());
 
         ResultActions response = mockMvc.perform(put("/testuser/movefolder")
                 .header("Authorization", "validToken")
@@ -512,7 +576,7 @@ public class FolderControllerTest {
     }
 
     @Test
-    public void folderController_moveFolder_ReturnsForbidden2() throws Exception {
+    public void folderController_moveFolder_ReturnsForbidden3() throws Exception {
         User user = new User();
         user.setId(1);
 
@@ -520,26 +584,20 @@ public class FolderControllerTest {
         folder.setId(1);
         folder.setUserId(1);
         folder.setParentFolderId(2);
-        folder.setPath("oldPath");
 
         Folder newParentFolder = new Folder();
         newParentFolder.setId(3);
         newParentFolder.setUserId(1);
-        newParentFolder.setPath("newPath");
 
         Folder oldParentFolder = new Folder();
         oldParentFolder.setId(2);
         oldParentFolder.setUserId(2);
-        oldParentFolder.setPath("oldParentPath");
 
         given(userRepo.findByUsername(anyString())).willReturn(Optional.of(user));
         given(jwtService.isTokenValid(anyString(), any(User.class))).willReturn(true);
-
         given(folderRepo.findById(1)).willReturn(Optional.of(folder));
         given(folderRepo.findById(3)).willReturn(Optional.of(newParentFolder));
         given(folderRepo.findById(2)).willReturn(Optional.of(oldParentFolder));
-
-        given(fileService.moveFile(anyString(), anyString())).willReturn(true);
 
         ResultActions response = mockMvc.perform(put("/testuser/movefolder")
                 .header("Authorization", "validToken")
@@ -557,21 +615,34 @@ public class FolderControllerTest {
         user.setId(1);
 
         Folder folder = new Folder();
+        folder.setId(1);
         folder.setUserId(1);
+        folder.setParentFolderId(2);
+
+        Folder newParentFolder = new Folder();
+        newParentFolder.setId(3);
+        newParentFolder.setUserId(1);
+
+        Folder oldParentFolder = new Folder();
+        oldParentFolder.setFolders(new ArrayList<>());
+        oldParentFolder.setId(2);
+        oldParentFolder.setUserId(1);
 
         given(userRepo.findByUsername(anyString())).willReturn(Optional.of(user));
         given(jwtService.isTokenValid(anyString(), any(User.class))).willReturn(true);
-        given(folderRepo.findById(anyInt())).willReturn(Optional.of(folder));
-        given(fileService.moveFile(anyString(), anyString())).willReturn(false);
+        given(folderRepo.findById(1)).willReturn(Optional.of(folder));
+        given(folderRepo.findById(3)).willReturn(Optional.of(newParentFolder));
+        given(folderRepo.findById(2)).willReturn(Optional.of(oldParentFolder));
+        given(folderRepo.save(any())).willThrow(new RuntimeException());
 
         ResultActions response = mockMvc.perform(put("/testuser/movefolder")
                 .header("Authorization", "validToken")
                 .param("id", "1")
                 .param("moveid", "3"));
 
-        response.andDo(MockMvcResultHandlers.print())
+         response.andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isInternalServerError())
-                .andExpect(content().string("Fehler beim Verschieben des Ordners im Dateisystem"));
+                .andExpect(content().string("Fehler beim Speichern des Ordners."));
     }
 
     @Test
@@ -583,13 +654,12 @@ public class FolderControllerTest {
         folder.setId(1);
         folder.setFolderName("folderName");
         folder.setUserId(1);
+        folder.setParentFolderId(1);
         folder.setFolders(new ArrayList<>());
-        folder.setPath("path");
 
         given(userRepo.findByUsername(anyString())).willReturn(Optional.of(user));
         given(jwtService.isTokenValid(anyString(), any(User.class))).willReturn(true);
         given(folderRepo.findById(anyInt())).willReturn(Optional.of(folder));
-        given(fileService.moveFile(anyString(), anyString())).willReturn(true);
 
         ResultActions response = mockMvc.perform(put("/testuser/movefolder")
                 .header("Authorization", "validToken")
