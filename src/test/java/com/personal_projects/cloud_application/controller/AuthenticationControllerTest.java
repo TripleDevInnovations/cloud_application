@@ -1,13 +1,5 @@
 package com.personal_projects.cloud_application.controller;
 
-import static org.mockito.ArgumentMatchers.anyString;
-import org.mockito.junit.jupiter.MockitoExtension;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import com.personal_projects.cloud_application.backend.controller.AuthenticationController;
 import com.personal_projects.cloud_application.backend.dto.JwtAuthenticationResponse;
 import com.personal_projects.cloud_application.backend.repositories.UserRepo;
@@ -17,13 +9,6 @@ import com.personal_projects.cloud_application.backend.dto.TokenRequest;
 import com.personal_projects.cloud_application.backend.entities.Role;
 import com.personal_projects.cloud_application.backend.entities.User;
 import com.personal_projects.cloud_application.backend.services.*;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.Test;
-import org.hamcrest.CoreMatchers;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -35,6 +20,22 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.http.MediaType;
+
+import static org.mockito.ArgumentMatchers.anyString;
+import org.mockito.junit.jupiter.MockitoExtension;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.Test;
+
+import org.hamcrest.CoreMatchers;
+
+import java.util.HashMap;
+import java.util.Map;
+
 
 @WebMvcTest(controllers = AuthenticationController.class)
 @AutoConfigureMockMvc(addFilters = false)
