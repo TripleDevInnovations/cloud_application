@@ -1,23 +1,26 @@
 package com.personal_projects.cloud_application.services;
 
+import com.personal_projects.cloud_application.backend.services.impl.JWTServiceImpl;
+
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-import com.personal_projects.cloud_application.backend.services.impl.JWTServiceImpl;
-import io.jsonwebtoken.*;
-import io.jsonwebtoken.io.Decoders;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.User;
+
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.*;
 
 import java.security.Key;
 import java.util.*;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 
 @ExtendWith(MockitoExtension.class)
 public class JWTServiceTest {

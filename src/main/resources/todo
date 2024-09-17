@@ -1,32 +1,19 @@
-DirectoryFileService:
-    - move to path
-    - show elements
-    - upload File
-    - create File
-    - rename File
-    - move element
+ - Repos für Neue Entities folder/fold
+ - sind wirklich alle Annotationen an den Entities wichtig? (z.B. toString)
+ - Backup-Service (Evtl. muss man ein Datu-Check machen, weil die cloud ja nicht 34/7 läuft. Also Datum in DB speichern,
+   wann letztes Backup war und wenn länger 7 Tage -> Backup
+ - 1.
 
-Controller:
-    - /login
-    - /{user}
-    - /{user}/{path}
-    - /{user}/{path}/download
-    - /{user}/{path}/upload
-    - /{user}/{path}/move
-    - /{user}/{path}/rename
 
-PMD:
 
-    Ein Quellcode-Analyse-Tool, das nach gängigen Fehlern wie ungenutzten Imports, unbenutzten Variablen, unnötigen Objekten usw. sucht.
+1. Relative Pfade verwenden
+Anstatt absolute Pfade zu speichern, könntest du relative Pfade verwenden. Das bedeutet, dass jeder Ordner nur seinen eigenen Namen und eine Referenz zu seinem übergeordneten Ordner speichert. Der vollständige Pfad kann dann zur Laufzeit konstruiert werden.
+
 
 
 https://learn.microsoft.com/en-us/sql/connect/jdbc/download-microsoft-jdbc-driver-for-sql-server?view=sql-server-ver16#download
 
-
-Evtl. doch in Datenbank informationen über dateien speichern (inkl. path). Das sollte für die Ausgabe im Frontend besser sein.
-Evtl. kann man auch die informationen(Größe, Name, Format) via prompt eingabe sich holen. Dann müsste aber jedes mal beim aufrufen seiner dateien
-diese Prompteingabe ausgeführt werden.
-
+1.
 Bei SignIn  ist wichtig, dass der Name noch nicht existiert. Wichtig: hier wird nicht zwischen Groß- und Kleinschreibung unterschieden.
 Aber erstmal testen, ob das nicht bereits implementiert ist
 -> Problem: Man kann ein Nutzer mit gleicher Zeichenreinfolge erstellen, wenn Groß- und

@@ -1,21 +1,23 @@
 package com.personal_projects.cloud_application.services;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.when;
-
-import com.personal_projects.cloud_application.backend.entities.User;
-import com.personal_projects.cloud_application.backend.repositories.UserRepo;
 import com.personal_projects.cloud_application.backend.services.impl.UserServiceImpl;
+import com.personal_projects.cloud_application.backend.repositories.UserRepo;
+import com.personal_projects.cloud_application.backend.entities.User;
 
-import java.util.Optional;
+import org.springframework.security.core.userdetails.UserDetails;
 
-import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.Test;
+
+import org.mockito.junit.jupiter.MockitoExtension;
+import static org.mockito.Mockito.when;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.core.userdetails.UserDetails;
+
+import org.assertj.core.api.Assertions;
+
+import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
