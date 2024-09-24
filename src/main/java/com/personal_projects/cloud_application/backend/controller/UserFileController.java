@@ -56,35 +56,30 @@ public class UserFileController {
 
         User user = optionalUser.get();
         Optional<Folder> optionalFolder = folderRepo.findById(folderId);
-        if (optionalUser.isEmpty() || optionalFolder.get().getUserId() != user.getId()) {
+        if (optionalFolder.isEmpty() || optionalFolder.get().getUserId() != user.getId()) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(USER_NOT_ALLOWED);
         }
-        if (optionalUser.isPresent() && jwtService.isTokenValid(token, optionalUser.get()) && !file.isEmpty()) {
-            if(optionalFolder.isPresent() && optionalFolder.get().getUserId() == user.getId()) {
-                Folder folder = optionalFolder.get();
 
-                UserFile userFile = new UserFile();
-                userFile.setFileName(file.getOriginalFilename());
-                userFile.setFileType(file.getContentType());
-                userFile.setSize(file.getSize());
-                userFile.setFolderId(folderId);
-                userFile.setUserId(user.getId());
-                userFile = userFileRepo.save(userFile);
+        Folder folder = optionalFolder.get();
 
-                if (fileService.saveFile(file, user.getId() + "/" + folder.getId() + "." + fileService.getFileExtension(userFile.getFileName()))) {
-                    List<UserFile> files = folder.getFiles();
-                    files.add(userFile);
-                    folder.setFiles(files);
-                    return ResponseEntity.ok(user);
-                } else {
-                    userFileRepo.delete(userFile);
-                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ERROR_SAVING_FILE);
-                }
-            } else {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User does not have access to this folder");
-            }
+        UserFile userFile = new UserFile();
+        userFile.setFileName(file.getOriginalFilename());
+        userFile.setFileType(file.getContentType());
+        userFile.setSize(file.getSize());
+        userFile.setFolderId(folderId);
+        userFile.setUserId(user.getId());
+        userFile = userFileRepo.save(userFile);
+
+        if (fileService.saveFile(file, user.getId() + "/" + userFile.getId() + "." + fileService.getFileExtension(userFile.getFileName()))) {
+            List<UserFile> files = folder.getFiles();
+            files.add(userFile);
+            folder.setFiles(files);
+            folderRepo.save(folder);
+            return ResponseEntity.ok(user);
+        } else {
+            userFileRepo.delete(userFile);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ERROR_SAVING_FILE);
         }
-
     }
 
 //    @GetMapping("/file")
