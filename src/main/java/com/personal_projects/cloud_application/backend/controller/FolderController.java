@@ -28,17 +28,15 @@ public class FolderController {
 
     private static final String FOLDER_PATH = "/folder";
     private static final String AUTHORIZATION_HEADER = "Authorization";
-    private static final String ERROR_SAVING_FOLDER = "Fehler beim Speichern des Ordners.";
-    private static final String ERROR_DELETING_FOLDER = "";
-    private static final String USER_NOT_FOUND_OR_UNAUTHORIZED = "Benutzer nicht gefunden oder Token ungültig.";
-    private static final String FOLDER_NOT_FOUND_OR_UNAUTHORIZED = "Ordner nicht gefunden oder Benutzer nicht berechtigt.";
-    private static final String PARENT_FOLDER_NOT_FOUND_OR_UNAUTHORIZED = "Übergeordneter Ordner nicht gefunden oder Benutzer nicht berechtigt.";
-    private static final String FOLDER_NAME_EMPTY = "Ordnername darf nicht leer sein.";
-    private static final String NEW_FOLDER_NAME_EMPTY = "Neuer Ordnername darf nicht leer sein.";
-    private static final String FOLDER_CANNOT_BE_RENAMED = "Dieser Ordner darf nicht umbenannt werden.";
-    private static final String FOLDER_CANNOT_BE_MOVED = "Dieser Ordner darf nicht verschoben werden.";
-    private static final String FOLDER_CANNOT_BE_DELETED = "Dieser Ordner darf nicht gelöscht werden.";
-
+    private static final String ERROR_SAVING_FOLDER = "Error saving folder.";
+    private static final String USER_NOT_FOUND_OR_UNAUTHORIZED = "User not found or token invalid.";
+    private static final String FOLDER_NOT_FOUND_OR_UNAUTHORIZED = "Folder not found or user not authorized.";
+    private static final String PARENT_FOLDER_NOT_FOUND_OR_UNAUTHORIZED = "Parent folder not found or user not authorized.";
+    private static final String FOLDER_NAME_EMPTY = "Folder name must not be empty.";
+    private static final String NEW_FOLDER_NAME_EMPTY = "New folder name must not be empty.";
+    private static final String FOLDER_CANNOT_BE_RENAMED = "This folder cannot be renamed.";
+    private static final String FOLDER_CANNOT_BE_MOVED = "This folder cannot be moved.";
+    private static final String FOLDER_CANNOT_BE_DELETED = "This folder cannot be deleted.";
     @Autowired
     private UserRepo userRepo;
     @Autowired

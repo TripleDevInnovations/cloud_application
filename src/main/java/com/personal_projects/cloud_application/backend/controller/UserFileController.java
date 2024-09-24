@@ -9,6 +9,7 @@ import com.personal_projects.cloud_application.backend.entities.UserFile;
 import com.personal_projects.cloud_application.backend.entities.Folder;
 import com.personal_projects.cloud_application.backend.entities.User;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +26,10 @@ import java.util.List;
 @RequestMapping("/{username}")
 public class UserFileController {
 
+    private static final String FILE_EMPTY = "The file must not be empty.";
+    private static final String ERROR_SAVING_FILE = "File could not be saved.";
+    private static final String USER_NOT_ALLOWED = "User is not authorized.";
+
     @Autowired
     private UserRepo userRepo;
     @Autowired
@@ -40,10 +45,21 @@ public class UserFileController {
 
     @PostMapping("/file")
     public ResponseEntity<?> createFile(@PathVariable String username, @RequestHeader("Authorization") String token, @RequestParam("id") int folderId, @RequestParam("file") MultipartFile file) {
+        if (file == null) {
+            return ResponseEntity.badRequest().body(FILE_EMPTY);
+        }
+
         Optional<User> optionalUser = userRepo.findByUsername(username);
+        if (optionalUser.isEmpty() || !jwtService.isTokenValid(token, optionalUser.get())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(USER_NOT_ALLOWED);
+        }
+
+        User user = optionalUser.get();
+        Optional<Folder> optionalFolder = folderRepo.findById(folderId);
+        if (optionalUser.isEmpty() || optionalFolder.get().getUserId() != user.getId()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(USER_NOT_ALLOWED);
+        }
         if (optionalUser.isPresent() && jwtService.isTokenValid(token, optionalUser.get()) && !file.isEmpty()) {
-            User user = optionalUser.get();
-            Optional<Folder> optionalFolder = folderRepo.findById(folderId);
             if(optionalFolder.isPresent() && optionalFolder.get().getUserId() == user.getId()) {
                 Folder folder = optionalFolder.get();
 
@@ -62,13 +78,13 @@ public class UserFileController {
                     return ResponseEntity.ok(user);
                 } else {
                     userFileRepo.delete(userFile);
-                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("File could not be saved");
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ERROR_SAVING_FILE);
                 }
             } else {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User does not have access to this folder");
             }
         }
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token or file is empty");
+
     }
 
 //    @GetMapping("/file")
