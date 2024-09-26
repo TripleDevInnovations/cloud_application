@@ -18,6 +18,11 @@ import org.springframework.http.HttpStatus;
 
 import lombok.RequiredArgsConstructor;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.List;
 
@@ -29,6 +34,9 @@ public class UserFileController {
     private static final String FILE_EMPTY = "The file must not be empty.";
     private static final String ERROR_SAVING_FILE = "File could not be saved.";
     private static final String USER_NOT_ALLOWED = "User is not authorized.";
+    private static final String MISSING_AUTHORIZATION = "The authorization is missing";
+    private static final String FILE_NOT_FOUND = "Requested file does not exist.";
+    private static final String MISSING_FILENAME = "The new Filename is missing";
 
     @Autowired
     private UserRepo userRepo;
@@ -41,12 +49,14 @@ public class UserFileController {
     @Autowired
     private FileService fileService;
 
-    private final static String basePath = "C:/Users/JAHEESE/Documents/cloudstorage/";
+    private final static String BASE_PATH = "C:/Users/JAHEESE/Documents/cloudstorage/";
 
     @PostMapping("/file")
     public ResponseEntity<?> createFile(@PathVariable String username, @RequestHeader("Authorization") String token, @RequestParam("id") int folderId, @RequestParam("file") MultipartFile file) {
         if (file == null) {
             return ResponseEntity.badRequest().body(FILE_EMPTY);
+        } else if (token.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(MISSING_AUTHORIZATION);
         }
 
         Optional<User> optionalUser = userRepo.findByUsername(username);
@@ -60,8 +70,6 @@ public class UserFileController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(USER_NOT_ALLOWED);
         }
 
-        Folder folder = optionalFolder.get();
-
         UserFile userFile = new UserFile();
         userFile.setFileName(file.getOriginalFilename());
         userFile.setFileType(file.getContentType());
@@ -70,6 +78,7 @@ public class UserFileController {
         userFile.setUserId(user.getId());
         userFile = userFileRepo.save(userFile);
 
+        Folder folder = optionalFolder.get();
         if (fileService.saveFile(file, user.getId() + "/" + userFile.getId() + "." + fileService.getFileExtension(userFile.getFileName()))) {
             List<UserFile> files = folder.getFiles();
             files.add(userFile);
@@ -82,41 +91,74 @@ public class UserFileController {
         }
     }
 
-//    @GetMapping("/file")
-//    public ResponseEntity<UserFile> readFile(@PathVariable String username, @RequestHeader("Authorization") String token, @RequestParam("id") int fileId) {
-//        Optional<User> optionalUser = userRepo.findByUsername(username);
-//        if (optionalUser.isPresent() && jwtService.isTokenValid(token, optionalUser.get())) {
-//            Optional<UserFile> optionalUserFile = userFileRepo.findById(fileId);
-//            if (optionalUserFile.isPresent() && optionalUserFile.get().getUser().equals(username)) {
-//                return ResponseEntity.ok(optionalUserFile.get());
-//            } else {
-//                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-//            }
-//        }
-//        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-//    }
-//
-//    @PutMapping("/file")
-//    public ResponseEntity<?> updateFile(@PathVariable String username, @RequestHeader("Authorization") String token, @RequestParam("id") int fileId, @RequestParam("newname") String newFileName) {
-//        Optional<User> optionalUser = userRepo.findByUsername(username);
-//        if (optionalUser.isPresent() && jwtService.isTokenValid(token, optionalUser.get())) {
-//            Optional<UserFile> optionalUserFile = userFileRepo.findById(fileId);
-//            if (optionalUserFile.isPresent() && optionalUserFile.get().getUser().equals(username)) {
-//                UserFile userFile = optionalUserFile.get();
-//                String oldFolderName = userFile.getFileName();
-//                userFile.setFileName(newFileName);
-//                String oldPath = userFile.getPath();
-//                userFile.setPath(fileService.changeFilePath(oldPath, newFileName));
-//
-//                if (fileService.renameFile(oldPath, newFileName)) {
-//                    return ResponseEntity.ok(userFileRepo.save(userFile));
-//                }
-//            } else {
-//                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User does not have access to this file");
-//            }
-//        }
-//        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token or user not found");
-//    }
+    @GetMapping("/file")
+    public ResponseEntity<?> readFile(@PathVariable String username, @RequestHeader("Authorization") String token, @RequestParam("id") int fileId) {
+        if (token.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(MISSING_AUTHORIZATION);
+        }
+
+        Optional<User> optionalUser = userRepo.findByUsername(username);
+        if (optionalUser.isEmpty() || !jwtService.isTokenValid(token, optionalUser.get())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(USER_NOT_ALLOWED);
+        }
+
+        Optional<UserFile> optionalUserFile = userFileRepo.findById(fileId);
+        if (optionalUserFile.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(FILE_NOT_FOUND);
+        }
+
+        if (optionalUserFile.get().getUserId() != optionalUser.get().getId()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(USER_NOT_ALLOWED);
+        }
+
+        return ResponseEntity.ok(optionalUserFile.get());
+    }
+
+    @PutMapping("/file")
+    public ResponseEntity<?> updateFile(@PathVariable String username, @RequestHeader("Authorization") String token, @RequestParam("id") int fileId, @RequestParam("newname") String newFileName) {
+        if (token.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(MISSING_AUTHORIZATION);
+        }
+        if (newFileName.isEmpty()) {
+            ResponseEntity.status(HttpStatus.BAD_REQUEST).body(MISSING_FILENAME);
+        }
+
+        Optional<User> optionalUser = userRepo.findByUsername(username);
+        if (optionalUser.isEmpty() || !jwtService.isTokenValid(token, optionalUser.get())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(USER_NOT_ALLOWED);
+        }
+
+        Optional<UserFile> optionalUserFile = userFileRepo.findById(fileId);
+        if (optionalUserFile.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(FILE_NOT_FOUND);
+        }
+
+        int userId = optionalUser.get().getId();
+        UserFile userFile = optionalUserFile.get();
+        if (userFile.getUserId() != userId) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(USER_NOT_ALLOWED);
+        }
+
+        String oldFileName = userFile.getFileName();
+        String oldFileExtension = fileService.getFileExtension(oldFileName);
+        String newFileExtension = fileService.getFileExtension(newFileName);
+
+        if (!Objects.equals(oldFileExtension, newFileExtension)) {
+            String newInternName = userFile.getId() + "." + newFileExtension;
+            fileService.renameFile(userId + "/" + userFile.getId() + "." + oldFileExtension, newInternName);
+
+            Path path = new File(BASE_PATH + newInternName).toPath();
+            try {
+                userFile.setFileType(Files.probeContentType(path));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        userFile.setFileName(newFileName);
+        userFileRepo.save(userFile);
+        return ResponseEntity.ok().build();
+    }
 
 //    @PutMapping("/movefile")
 //    public ResponseEntity<?> moveFile(@PathVariable String username, @RequestHeader("Authorization") String token, @RequestParam("fileid") int fileId, @RequestParam("folderid") int folderId) {

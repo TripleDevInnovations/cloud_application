@@ -35,10 +35,6 @@ public class FileServiceImpl implements FileService {
         }
 
         try {
-            // Stelle sicher, dass das Verzeichnis existiert
-            File directory = new File(BASEPATH + path);
-            directory.getName(); //nur weil pmd sonst einen
-
             // Erstelle den Pfad, unter dem die Datei gespeichert wird
             Path filePath = Paths.get(BASEPATH + path);
             Files.write(filePath, file.getBytes());
