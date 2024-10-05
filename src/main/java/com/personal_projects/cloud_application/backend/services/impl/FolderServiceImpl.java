@@ -82,6 +82,7 @@ public class FolderServiceImpl implements FolderService {
                     newFolders.add(folder);
                     newParentFolder.setFolders(newFolders);
                     folderRepo.save(newParentFolder);
+                    folderRepo.save(folder);
                     return ResponseEntity.ok().build();
                 } catch (DataAccessException dae) {
                     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Fehler beim Speichern des Ordners.");

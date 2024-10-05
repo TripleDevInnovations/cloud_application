@@ -9,7 +9,6 @@ import com.personal_projects.cloud_application.backend.entities.UserFile;
 import com.personal_projects.cloud_application.backend.entities.Folder;
 import com.personal_projects.cloud_application.backend.entities.User;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.bind.annotation.*;
@@ -34,9 +33,9 @@ public class UserFileController {
     private static final String FILE_EMPTY = "The file must not be empty.";
     private static final String ERROR_SAVING_FILE = "File could not be saved.";
     private static final String USER_NOT_ALLOWED = "User is not authorized.";
-    private static final String MISSING_AUTHORIZATION = "The authorization is missing";
+    private static final String MISSING_AUTHORIZATION = "The authorization is missing.";
     private static final String FILE_NOT_FOUND = "Requested file does not exist.";
-    private static final String MISSING_FILENAME = "The new Filename is missing";
+    private static final String MISSING_ARGUMENTS = "Some information is missing.";
 
     @Autowired
     private UserRepo userRepo;
@@ -53,7 +52,7 @@ public class UserFileController {
 
     @PostMapping("/file")
     public ResponseEntity<?> createFile(@PathVariable String username, @RequestHeader("Authorization") String token, @RequestParam("id") int folderId, @RequestParam("file") MultipartFile file) {
-        if (file == null) {
+        if (file == null || file.isEmpty()) {
             return ResponseEntity.badRequest().body(FILE_EMPTY);
         } else if (token.isEmpty()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(MISSING_AUTHORIZATION);
@@ -120,7 +119,7 @@ public class UserFileController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(MISSING_AUTHORIZATION);
         }
         if (newFileName.isEmpty()) {
-            ResponseEntity.status(HttpStatus.BAD_REQUEST).body(MISSING_FILENAME);
+            ResponseEntity.status(HttpStatus.BAD_REQUEST).body(MISSING_ARGUMENTS);
         }
 
         Optional<User> optionalUser = userRepo.findByUsername(username);
@@ -139,16 +138,15 @@ public class UserFileController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(USER_NOT_ALLOWED);
         }
 
-        String oldFileName = userFile.getFileName();
-        String oldFileExtension = fileService.getFileExtension(oldFileName);
+        String oldFileExtension = fileService.getFileExtension(userFile.getFileName());
         String newFileExtension = fileService.getFileExtension(newFileName);
 
         if (!Objects.equals(oldFileExtension, newFileExtension)) {
             String newInternName = userFile.getId() + "." + newFileExtension;
             fileService.renameFile(userId + "/" + userFile.getId() + "." + oldFileExtension, newInternName);
 
-            Path path = new File(BASE_PATH + newInternName).toPath();
             try {
+                Path path = new File(BASE_PATH + newInternName).toPath();
                 userFile.setFileType(Files.probeContentType(path));
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -160,52 +158,59 @@ public class UserFileController {
         return ResponseEntity.ok().build();
     }
 
-//    @PutMapping("/movefile")
-//    public ResponseEntity<?> moveFile(@PathVariable String username, @RequestHeader("Authorization") String token, @RequestParam("fileid") int fileId, @RequestParam("folderid") int folderId) {
-//        Optional<User> optionalUser = userRepo.findByUsername(username);
-//        if (optionalUser.isPresent() && jwtService.isTokenValid(token, optionalUser.get())) {
-//            Optional<UserFile> optionalUserFile = userFileRepo.findById(fileId);
-//            Optional<Folder> optionalFolder = folderRepo.findById(folderId);
-//            if (optionalUserFile.isPresent() && optionalFolder.isPresent()) {
-//                UserFile userFile = optionalUserFile.get();
-//                Folder newFolder = optionalFolder.get();
-//                if (userFile.getUser().equals(username) && newFolder.getUser().equals(username)) {
-//                    Optional<Folder> optionalOldFolder = folderRepo.findById(userFile.getFolderId());
-//                    if (optionalOldFolder.isPresent() && optionalOldFolder.get().getUser().equals(username)) {
-//                        Folder oldFolder = optionalOldFolder.get();
-//                        List<UserFile> oldUserFiles = oldFolder.getFiles();
-//                        oldUserFiles.remove(userFile);
-//                        oldFolder.setFiles(oldUserFiles);
-//                        folderRepo.save(oldFolder);
-//
-//                        List<UserFile> newUserFiles = newFolder.getFiles();
-//                        newUserFiles.add(userFile);
-//                        newFolder.setFiles(newUserFiles);
-//                        folderRepo.save(newFolder);
-//
-//                        String oldPath = userFile.getPath();
-//                        userFile.setFolderId(newFolder.getId());
-//                        userFile.setPath(newFolder.getPath() + "/" + userFile.getFileName());
-//                        userFileRepo.save(userFile);
-//
-//                        if (fileService.moveFile(oldPath, userFile.getPath())) {
-//                            return ResponseEntity.ok().build();
-//                        } else {
-//                            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Fehler beim Verschieben der Datei");
-//                        }
-//                    } else {
-//                        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Alter Ordner nicht gefunden oder Benutzer nicht berechtigt");
-//                    }
-//                } else {
-//                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Benutzer nicht berechtigt");
-//                }
-//            } else {
-//                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Datei oder neuer Ordner nicht gefunden");
-//            }
-//        } else {
-//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Benutzer nicht gefunden oder Token ungültig");
-//        }
-//    }
+    @PutMapping("/movefile")
+    public ResponseEntity<?> moveFile(@PathVariable String username, @RequestHeader("Authorization") String token, @RequestParam("fileid") int fileId, @RequestParam("folderid") int folderId) {
+        if (token.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(MISSING_AUTHORIZATION);
+        }
+        if (fileId == 0 || folderId == 0) {
+            ResponseEntity.status(HttpStatus.BAD_REQUEST).body(MISSING_ARGUMENTS);
+        }
+
+        Optional<User> optionalUser = userRepo.findByUsername(username);
+        if (optionalUser.isPresent() && jwtService.isTokenValid(token, optionalUser.get())) {
+            Optional<UserFile> optionalUserFile = userFileRepo.findById(fileId);
+            Optional<Folder> optionalFolder = folderRepo.findById(folderId);
+            if (optionalUserFile.isPresent() && optionalFolder.isPresent()) {
+                UserFile userFile = optionalUserFile.get();
+                Folder newFolder = optionalFolder.get();
+                if (userFile.getUser().equals(username) && newFolder.getUser().equals(username)) {
+                    Optional<Folder> optionalOldFolder = folderRepo.findById(userFile.getFolderId());
+                    if (optionalOldFolder.isPresent() && optionalOldFolder.get().getUser().equals(username)) {
+                        Folder oldFolder = optionalOldFolder.get();
+                        List<UserFile> oldUserFiles = oldFolder.getFiles();
+                        oldUserFiles.remove(userFile);
+                        oldFolder.setFiles(oldUserFiles);
+                        folderRepo.save(oldFolder);
+
+                        List<UserFile> newUserFiles = newFolder.getFiles();
+                        newUserFiles.add(userFile);
+                        newFolder.setFiles(newUserFiles);
+                        folderRepo.save(newFolder);
+
+                        String oldPath = userFile.getPath();
+                        userFile.setFolderId(newFolder.getId());
+                        userFile.setPath(newFolder.getPath() + "/" + userFile.getFileName());
+                        userFileRepo.save(userFile);
+
+                        if (fileService.moveFile(oldPath, userFile.getPath())) {
+                            return ResponseEntity.ok().build();
+                        } else {
+                            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Fehler beim Verschieben der Datei");
+                        }
+                    } else {
+                        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Alter Ordner nicht gefunden oder Benutzer nicht berechtigt");
+                    }
+                } else {
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Benutzer nicht berechtigt");
+                }
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Datei oder neuer Ordner nicht gefunden");
+            }
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Benutzer nicht gefunden oder Token ungültig");
+        }
+    }
 //
 //    @DeleteMapping("/file")
 //    public ResponseEntity<?> deleteFile(@PathVariable String username, @RequestHeader("Authorization") String token, @RequestParam("fileid") int fileId) {
