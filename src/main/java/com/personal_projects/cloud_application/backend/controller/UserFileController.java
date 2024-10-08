@@ -35,6 +35,7 @@ public class UserFileController {
     private static final String USER_NOT_ALLOWED = "User is not authorized.";
     private static final String MISSING_AUTHORIZATION = "The authorization is missing.";
     private static final String FILE_NOT_FOUND = "Requested file does not exist.";
+    private static final String FOLDER_NOT_FOUND = "Requested Folder does not exist.";
     private static final String MISSING_ARGUMENTS = "Some information is missing.";
 
     @Autowired
@@ -53,20 +54,32 @@ public class UserFileController {
     @PostMapping("/file")
     public ResponseEntity<?> createFile(@PathVariable String username, @RequestHeader("Authorization") String token, @RequestParam("id") int folderId, @RequestParam("file") MultipartFile file) {
         if (file == null || file.isEmpty()) {
-            return ResponseEntity.badRequest().body(FILE_EMPTY);
-        } else if (token.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(MISSING_AUTHORIZATION);
+            return ResponseEntity.badRequest().body("Error 111: " + FILE_EMPTY);
+        }
+
+        if (token.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Error 112: " + MISSING_AUTHORIZATION);
         }
 
         Optional<User> optionalUser = userRepo.findByUsername(username);
-        if (optionalUser.isEmpty() || !jwtService.isTokenValid(token, optionalUser.get())) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(USER_NOT_ALLOWED);
+        if (optionalUser.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Error 113: " + USER_NOT_ALLOWED);
         }
 
         User user = optionalUser.get();
+        if (!jwtService.isTokenValid(token, user)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Error 114: " + USER_NOT_ALLOWED);
+
+        }
+
         Optional<Folder> optionalFolder = folderRepo.findById(folderId);
-        if (optionalFolder.isEmpty() || optionalFolder.get().getUserId() != user.getId()) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(USER_NOT_ALLOWED);
+        if (optionalFolder.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Error 115: " + FOLDER_NOT_FOUND);
+        }
+
+        Folder folder = optionalFolder.get();
+        if (folder.getUserId() != user.getId()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Error 116: " + USER_NOT_ALLOWED);
         }
 
         UserFile userFile = new UserFile();
@@ -77,7 +90,6 @@ public class UserFileController {
         userFile.setUserId(user.getId());
         userFile = userFileRepo.save(userFile);
 
-        Folder folder = optionalFolder.get();
         if (fileService.saveFile(file, user.getId() + "/" + userFile.getId() + "." + fileService.getFileExtension(userFile.getFileName()))) {
             List<UserFile> files = folder.getFiles();
             files.add(userFile);
@@ -86,31 +98,37 @@ public class UserFileController {
             return ResponseEntity.ok(user);
         } else {
             userFileRepo.delete(userFile);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ERROR_SAVING_FILE);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error 117: " + ERROR_SAVING_FILE);
         }
     }
 
     @GetMapping("/file")
     public ResponseEntity<?> readFile(@PathVariable String username, @RequestHeader("Authorization") String token, @RequestParam("id") int fileId) {
         if (token.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(MISSING_AUTHORIZATION);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Error 121: " + MISSING_AUTHORIZATION);
         }
 
         Optional<User> optionalUser = userRepo.findByUsername(username);
-        if (optionalUser.isEmpty() || !jwtService.isTokenValid(token, optionalUser.get())) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(USER_NOT_ALLOWED);
+        if (optionalUser.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Error 122: " + USER_NOT_ALLOWED);
+        }
+
+        User user = optionalUser.get();
+        if (!jwtService.isTokenValid(token, user)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Error 123: " + USER_NOT_ALLOWED);
         }
 
         Optional<UserFile> optionalUserFile = userFileRepo.findById(fileId);
         if (optionalUserFile.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(FILE_NOT_FOUND);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Error 124: " + FILE_NOT_FOUND);
         }
 
-        if (optionalUserFile.get().getUserId() != optionalUser.get().getId()) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(USER_NOT_ALLOWED);
+        UserFile userFile = optionalUserFile.get();
+        if (userFile.getUserId() != user.getId()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Error 125: " + USER_NOT_ALLOWED);
         }
 
-        return ResponseEntity.ok(optionalUserFile.get());
+        return ResponseEntity.ok(userFile);
     }
 
     @PutMapping("/file")
@@ -159,93 +177,97 @@ public class UserFileController {
     }
 
     @PutMapping("/movefile")
-    public ResponseEntity<?> moveFile(@PathVariable String username, @RequestHeader("Authorization") String token, @RequestParam("fileid") int fileId, @RequestParam("folderid") int folderId) {
+    public ResponseEntity<?> moveFile(@PathVariable String username, @RequestHeader("Authorization") String token, @RequestParam("fileid") int fileId, @RequestParam("folderid") int newParentFolderId) {
         if (token.isEmpty()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(MISSING_AUTHORIZATION);
         }
-        if (fileId == 0 || folderId == 0) {
+        if (fileId == 0 || newParentFolderId == 0) {
             ResponseEntity.status(HttpStatus.BAD_REQUEST).body(MISSING_ARGUMENTS);
         }
 
         Optional<User> optionalUser = userRepo.findByUsername(username);
-        if (optionalUser.isPresent() && jwtService.isTokenValid(token, optionalUser.get())) {
-            Optional<UserFile> optionalUserFile = userFileRepo.findById(fileId);
-            Optional<Folder> optionalFolder = folderRepo.findById(folderId);
-            if (optionalUserFile.isPresent() && optionalFolder.isPresent()) {
-                UserFile userFile = optionalUserFile.get();
-                Folder newFolder = optionalFolder.get();
-                if (userFile.getUser().equals(username) && newFolder.getUser().equals(username)) {
-                    Optional<Folder> optionalOldFolder = folderRepo.findById(userFile.getFolderId());
-                    if (optionalOldFolder.isPresent() && optionalOldFolder.get().getUser().equals(username)) {
-                        Folder oldFolder = optionalOldFolder.get();
-                        List<UserFile> oldUserFiles = oldFolder.getFiles();
-                        oldUserFiles.remove(userFile);
-                        oldFolder.setFiles(oldUserFiles);
-                        folderRepo.save(oldFolder);
+        if (optionalUser.isEmpty() || !jwtService.isTokenValid(token, optionalUser.get())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(USER_NOT_ALLOWED);
+        }
 
-                        List<UserFile> newUserFiles = newFolder.getFiles();
-                        newUserFiles.add(userFile);
-                        newFolder.setFiles(newUserFiles);
-                        folderRepo.save(newFolder);
+        Optional<UserFile> optionalUserFile = userFileRepo.findById(fileId);
+        Optional<Folder> optionalNewParentFolder = folderRepo.findById(newParentFolderId);
+        if (optionalUserFile.isEmpty() || optionalNewParentFolder.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(FILE_NOT_FOUND + " Or aiming folder not found.");
+        }
 
-                        String oldPath = userFile.getPath();
-                        userFile.setFolderId(newFolder.getId());
-                        userFile.setPath(newFolder.getPath() + "/" + userFile.getFileName());
-                        userFileRepo.save(userFile);
+        int userId = optionalUser.get().getId();
+        UserFile userFile = optionalUserFile.get();
+        Folder newParentFolder = optionalNewParentFolder.get();
+        if (userFile.getUserId() != userId || newParentFolder.getUserId() != userId) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(USER_NOT_ALLOWED);
+        }
 
-                        if (fileService.moveFile(oldPath, userFile.getPath())) {
-                            return ResponseEntity.ok().build();
-                        } else {
-                            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Fehler beim Verschieben der Datei");
-                        }
-                    } else {
-                        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Alter Ordner nicht gefunden oder Benutzer nicht berechtigt");
-                    }
-                } else {
-                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Benutzer nicht berechtigt");
-                }
-            } else {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Datei oder neuer Ordner nicht gefunden");
+        Optional<Folder> optionalOldParentFolder = folderRepo.findById(userFile.getFolderId());
+        if (optionalOldParentFolder.isEmpty() ||optionalOldParentFolder.get().getUserId() != userId) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Alter Ordner nicht gefunden oder Benutzer nicht berechtigt");
+        }
+
+        Folder oldParentFolder = optionalOldParentFolder.get();
+        List<UserFile> oldUserFiles = oldParentFolder.getFiles();
+        oldUserFiles.remove(userFile);
+        oldParentFolder.setFiles(oldUserFiles);
+        folderRepo.save(oldParentFolder);
+
+        userFile.setFolderId(newParentFolderId);
+        userFileRepo.save(userFile);
+
+        List<UserFile> newUserFiles = newParentFolder.getFiles();
+        newUserFiles.add(userFile);
+        newParentFolder.setFiles(newUserFiles);
+        folderRepo.save(newParentFolder);
+
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/file")
+    public ResponseEntity<?> deleteFile(@PathVariable String username, @RequestHeader("Authorization") String token, @RequestParam("fileid") int fileId) {
+        if (token.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(MISSING_AUTHORIZATION);
+        }
+
+        if (fileId == 0) {
+            ResponseEntity.status(HttpStatus.BAD_REQUEST).body(MISSING_ARGUMENTS);
+        }
+
+        Optional<User> optionalUser = userRepo.findByUsername(username);
+        if (optionalUser.isEmpty() || !jwtService.isTokenValid(token, optionalUser.get())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(USER_NOT_ALLOWED);
+        }
+
+        int userId = optionalUser.get().getId();
+        Optional<UserFile> optionalUserFile = userFileRepo.findById(fileId);
+        if (optionalUserFile.isEmpty() || optionalUserFile.get().getUserId() != userId) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(FILE_NOT_FOUND);
+        }
+
+        UserFile userFile = optionalUserFile.get();
+        Optional<Folder> optionalFolder = folderRepo.findById(userFile.getFolderId());
+        if (optionalFolder.isEmpty() || optionalFolder.get().getUserId() != userId) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(USER_NOT_ALLOWED);
+        }
+
+        Folder folder = optionalFolder.get();
+        List<UserFile> userFiles = folder.getFiles();
+        boolean removed = userFiles.removeIf(userFile1 -> userFile1.equals(userFile));
+
+        if (removed) {
+            if (fileService.deleteFile(userId + "/" + userFile.getId() + "." + fileService.getFileExtension(userFile.getFileName()))) {
+                folder.setFiles(userFiles);
+                folderRepo.save(folder);
+                userFileRepo.delete(userFile);
+                return ResponseEntity.ok().build();                        }
+            else {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Fehler beim Löschen der Datei vom Dateisystem");
             }
         } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Benutzer nicht gefunden oder Token ungültig");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Fehler beim Entfernen der Datei aus dem Ordner");
         }
     }
-//
-//    @DeleteMapping("/file")
-//    public ResponseEntity<?> deleteFile(@PathVariable String username, @RequestHeader("Authorization") String token, @RequestParam("fileid") int fileId) {
-//        Optional<User> optionalUser = userRepo.findByUsername(username);
-//        if (optionalUser.isPresent() && jwtService.isTokenValid(token, optionalUser.get())) {
-//            Optional<UserFile> optionalUserFile = userFileRepo.findById(fileId);
-//            if (optionalUserFile.isPresent() && optionalUserFile.get().getUser().equals(username)) {
-//                UserFile userFile = optionalUserFile.get();
-//                Optional<Folder> optionalFolder = folderRepo.findById(userFile.getFolderId());
-//                if (optionalFolder.isPresent() && optionalFolder.get().getUser().equals(username)) {
-//                    Folder folder = optionalFolder.get();
-//                    List<UserFile> userFiles = folder.getFiles();
-//                    boolean removed = userFiles.removeIf(userFile1 -> userFile1.equals(userFile));
-//
-//                    if (removed) {
-//                        if (fileService.deleteFile(userFile.getPath())) {
-//                            folder.setFiles(userFiles);
-//                            folderRepo.save(folder);
-//                            userFileRepo.delete(userFile);
-//                            return ResponseEntity.ok().build();                        }
-//                        else {
-//                            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Fehler beim Löschen der Datei vom Dateisystem");
-//                        }
-//                    } else {
-//                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Fehler beim Entfernen der Datei aus dem Ordner");
-//                    }
-//                } else {
-//                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Ordner nicht gefunden oder Benutzer nicht berechtigt");
-//                }
-//            } else {
-//                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Datei nicht gefunden oder Benutzer nicht berechtigt");
-//            }
-//        } else {
-//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Benutzer nicht gefunden oder Token ungültig");
-//        }
-//    }
 
 }
