@@ -134,26 +134,31 @@ public class UserFileController {
     @PutMapping("/file")
     public ResponseEntity<?> updateFile(@PathVariable String username, @RequestHeader("Authorization") String token, @RequestParam("id") int fileId, @RequestParam("newname") String newFileName) {
         if (token.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(MISSING_AUTHORIZATION);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Error 131: " + MISSING_AUTHORIZATION);
         }
         if (newFileName.isEmpty()) {
-            ResponseEntity.status(HttpStatus.BAD_REQUEST).body(MISSING_ARGUMENTS);
+            ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error 132: " + MISSING_ARGUMENTS);
         }
 
         Optional<User> optionalUser = userRepo.findByUsername(username);
-        if (optionalUser.isEmpty() || !jwtService.isTokenValid(token, optionalUser.get())) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(USER_NOT_ALLOWED);
+        if (optionalUser.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Error 133: " + USER_NOT_ALLOWED);
+        }
+
+        User user = optionalUser.get();
+        if (jwtService.isTokenValid(token, user)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Error 134: " + USER_NOT_ALLOWED);
         }
 
         Optional<UserFile> optionalUserFile = userFileRepo.findById(fileId);
         if (optionalUserFile.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(FILE_NOT_FOUND);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Error 135: " + FILE_NOT_FOUND);
         }
 
-        int userId = optionalUser.get().getId();
+        int userId = user.getId();
         UserFile userFile = optionalUserFile.get();
         if (userFile.getUserId() != userId) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(USER_NOT_ALLOWED);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Error 136: " + USER_NOT_ALLOWED);
         }
 
         String oldFileExtension = fileService.getFileExtension(userFile.getFileName());
@@ -179,36 +184,54 @@ public class UserFileController {
     @PutMapping("/movefile")
     public ResponseEntity<?> moveFile(@PathVariable String username, @RequestHeader("Authorization") String token, @RequestParam("fileid") int fileId, @RequestParam("folderid") int newParentFolderId) {
         if (token.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(MISSING_AUTHORIZATION);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Error 141: " + MISSING_AUTHORIZATION);
         }
         if (fileId == 0 || newParentFolderId == 0) {
-            ResponseEntity.status(HttpStatus.BAD_REQUEST).body(MISSING_ARGUMENTS);
+            ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error 142: " + MISSING_ARGUMENTS);
         }
 
         Optional<User> optionalUser = userRepo.findByUsername(username);
-        if (optionalUser.isEmpty() || !jwtService.isTokenValid(token, optionalUser.get())) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(USER_NOT_ALLOWED);
+        if (optionalUser.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Error 143: " + USER_NOT_ALLOWED);
+        }
+
+        User user = optionalUser.get();
+        if (!jwtService.isTokenValid(token, user)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Error 144: " + USER_NOT_ALLOWED);
         }
 
         Optional<UserFile> optionalUserFile = userFileRepo.findById(fileId);
-        Optional<Folder> optionalNewParentFolder = folderRepo.findById(newParentFolderId);
-        if (optionalUserFile.isEmpty() || optionalNewParentFolder.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(FILE_NOT_FOUND + " Or aiming folder not found.");
+        if (optionalUserFile.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Error 145: " + FILE_NOT_FOUND);
         }
 
-        int userId = optionalUser.get().getId();
+        Optional<Folder> optionalNewParentFolder = folderRepo.findById(newParentFolderId);
+        if (optionalNewParentFolder.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Error 146: " + FILE_NOT_FOUND);
+
+        }
+
+        int userId = user.getId();
         UserFile userFile = optionalUserFile.get();
+        if (userFile.getUserId() != userId) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Error 147: " + USER_NOT_ALLOWED);
+        }
+
         Folder newParentFolder = optionalNewParentFolder.get();
-        if (userFile.getUserId() != userId || newParentFolder.getUserId() != userId) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(USER_NOT_ALLOWED);
+        if (newParentFolder.getUserId() != userId) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Error 148: " + USER_NOT_ALLOWED);
         }
 
         Optional<Folder> optionalOldParentFolder = folderRepo.findById(userFile.getFolderId());
-        if (optionalOldParentFolder.isEmpty() ||optionalOldParentFolder.get().getUserId() != userId) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Alter Ordner nicht gefunden oder Benutzer nicht berechtigt");
+        if (optionalOldParentFolder.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Error 149: " + FOLDER_NOT_FOUND);
         }
 
         Folder oldParentFolder = optionalOldParentFolder.get();
+        if (oldParentFolder.getUserId() != userId) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Error 1410: " + USER_NOT_ALLOWED);
+        }
+
         List<UserFile> oldUserFiles = oldParentFolder.getFiles();
         oldUserFiles.remove(userFile);
         oldParentFolder.setFiles(oldUserFiles);
